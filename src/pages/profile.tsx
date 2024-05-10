@@ -14,12 +14,6 @@ import Post from "../component/Post";
 import TweetModal from "../component/Inputmodal";
 
 const ProfilePage = () => {
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
 
   return (
     <Flex

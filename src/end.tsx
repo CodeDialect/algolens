@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { createProductAction, getProductsAction } from "./utils/marketplace";
+import { createProductAction, signIn } from "./utils/marketplace";
 import { Box, Button } from "@chakra-ui/react";
+import { base64ToUTF8String } from "./utils/conversion";
+import { signin } from "./utils/sigin";
 
 
 function End() {
@@ -24,24 +26,20 @@ function End() {
       }
     });
   });
-  console.log(accountAddress);
+  console.log(base64ToUTF8String("c3Vubnk="));
   return (
     <>
     <Box className="App">
       <Button
-        onClick={() =>
-          createProductAction(peraWallet, accountAddress, {
-            name: "Test Product",
-            image: "https://picsum.photos/200",
-            description: "Test Description",
-            price: 10,
-          })
-        }
+        // onClick={() =>
+        //   createProductAction(peraWallet, accountAddress, {
+        //     username: "Sunny",
+        //   })
+        // }
+        // onClick={() => signIn("Text", accountAddress, peraWallet)}
+        onClick={() => signin(accountAddress, peraWallet)}
       >
         Create Test Product
-      </Button>
-      <Button onClick={() => getProductsAction()}>
-        Get Products
       </Button>
       <Button
         onClick={

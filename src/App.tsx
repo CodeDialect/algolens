@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Home } from "./pages/home";
 import LoginPage from "./pages/login";
+import End from "./end";
 import ProfilePage from "./pages/profile";
 import { useEffect } from "react";
 

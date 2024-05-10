@@ -17,13 +17,6 @@ import { LinkIcon, StarIcon } from "@chakra-ui/icons";
 import Post from "../component/Post";
 export const Home = () => {
 
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
-
   return (
     <Flex
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
