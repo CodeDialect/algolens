@@ -1,25 +1,27 @@
-import { getDocs, collection } from "firebase/firestore";
-import { db } from "../database/firebase";
 import { algodClient, indexerClient } from "./constants";
 import { utf8ToBase64String, base64ToUTF8String } from "./conversion";
 import algosdk from "algosdk";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
+import { PeraWalletConnect } from "@perawallet/connect";
+import { fetchUsers } from "../database/fetch";
 
-export const signin = async (senderAddress: any, perawallet: any) => {
-  const user = "sunny";
-  const op = "logout";
-  const fetchUsers: () => Promise<any> = async () =>
-    await getDocs(collection(db, "products"))
-      .then((querySnapshot) => {
-        const newData = querySnapshot.docs.map((doc) => ({
-          ...doc.data(),
-          appId: doc.data().appId,
-        }));
-        return newData;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+interface UserData {
+  username: string | undefined;
+  owner: string;
+}
+
+export const signin = async (
+  username: string,
+  senderAddress: string,
+  perawallet: PeraWalletConnect,
+  op: string
+) => {
+  const operation = new TextEncoder().encode(op);
+
+  let params = await algodClient.getTransactionParams().do();
+  params.fee = algosdk.ALGORAND_MIN_TX_FEE;
+  params.flatFee = true;
+  const user = new TextEncoder().encode(username);
 
   try {
     const appIds = await fetchUsers();
@@ -33,7 +35,7 @@ export const signin = async (senderAddress: any, perawallet: any) => {
         return state.key === utf8ToBase64String(fieldName);
       });
     };
-    console.log("Fetching products...");
+    let userData: UserData[] = [];
     await Promise.all(
       appIds.map(async (item: any) => {
         console.log(item.appId);
@@ -47,24 +49,26 @@ export const signin = async (senderAddress: any, perawallet: any) => {
         }
         let globalState = transactionInfo.application.params["global-state"];
         let owner = transactionInfo.application.params.creator;
-        let userName = "";
+        let registeredUsername;
         let appId = transactionInfo.application.id;
         console.log(transactionInfo);
         if (getField("USERNAME", globalState) !== undefined) {
           let field = getField("USERNAME", globalState).value.bytes;
-          userName = base64ToUTF8String(field);
+          registeredUsername = base64ToUTF8String(field);
         }
+        userData.push({
+          username: registeredUsername,
+          owner: owner,
+        });
 
-        let signin = new TextEncoder().encode("logout");
-        let signName = new TextEncoder().encode(user);
-
-        let params = await algodClient.getTransactionParams().do();
-        params.fee = algosdk.ALGORAND_MIN_TX_FEE;
-        params.flatFee = true;
-        if (userName === user) {
-          let appArgs = [signin, signName];
-
-          console.log(appArgs);
+        console.log(userData);
+        if (
+          userData.some((data) => data.username?.toLowerCase() === username.toLowerCase()) &&
+          userData.some((data) => data.owner === senderAddress)
+        ) {
+          console.log("Signed in");
+          let appArgs = [operation, user];
+          console.log(op);
           const signTxn = algosdk.makeApplicationCallTxnFromObject({
             from: senderAddress,
             appIndex: appId,
@@ -114,8 +118,6 @@ export const signin = async (senderAddress: any, perawallet: any) => {
               confirmedTxn["confirmed-round"]
           );
         }
-
-        console.log(userName, owner, appId);
       })
     );
   } catch (err) {

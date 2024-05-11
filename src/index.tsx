@@ -4,6 +4,7 @@ import { extendTheme } from "@chakra-ui/react";
 import App from "./App";
 import Nav from "./component/Navbar";
 import "./index.css";
+import { useState } from "react";
 const container = document.getElementById("root");
 const root = createRoot(container!);
 
@@ -16,7 +17,6 @@ const theme = extendTheme({
 })
 root.render(
   <ChakraProvider theme={theme}>
-    <Nav />
     <App />
   </ChakraProvider>
 );

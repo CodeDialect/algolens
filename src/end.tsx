@@ -37,7 +37,7 @@ function End() {
         //   })
         // }
         // onClick={() => signIn("Text", accountAddress, peraWallet)}
-        onClick={() => signin(accountAddress, peraWallet)}
+        // onClick={() => signin(accountAddress, peraWallet)}
       >
         Create Test Product
       </Button>
