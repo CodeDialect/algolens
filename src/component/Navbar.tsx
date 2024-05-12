@@ -13,14 +13,19 @@ import {
   Stack,
   Center,
   Image,
-  Link
+  Link,
+  useToast,
 } from "@chakra-ui/react";
+import { signin } from "../utils/sigin";
+import { PeraWalletConnect } from "@perawallet/connect";
 
 interface NavProps {
   children: React.ReactNode;
   accountAddress: string | null;
+  username: string;
   handleConnectWalletClick: () => void;
   handleDisconnectWalletClick: () => void;
+  peraWallet: PeraWalletConnect;
 }
 
 export default function Nav({
@@ -28,7 +33,24 @@ export default function Nav({
   accountAddress,
   handleConnectWalletClick,
   handleDisconnectWalletClick,
+  peraWallet,
+  username,
 }: NavProps) {
+  const toast = useToast();
+
+  const handleLogout = async () => {
+    if (username !== "" && accountAddress) {
+      await signin(username, accountAddress, peraWallet, "logout");
+      toast({
+        title: "Success",
+        description: "Logged out successfully",
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <>
       <Box
@@ -60,6 +82,20 @@ export default function Nav({
                 >
                   Connect to Pera Wallet
                 </Button>
+              ) : username === "" ? (
+                <Button
+                  _hover={{
+                    transform: "scale(1.05)",
+                    transition: "transform 0.3s ease-in-out",
+                  }}
+                  color={"white"}
+                  backgroundImage={
+                    "linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"
+                  }
+                  onClick={() => handleDisconnectWalletClick()}
+                >
+                  Disconnect
+                </Button>
               ) : (
                 <Menu>
                   <MenuButton
@@ -86,13 +122,12 @@ export default function Nav({
                     </Center>
                     <br />
                     <Center>
-                      <p>Username</p>
+                      <p>{username}</p>
                     </Center>
                     <br />
                     <MenuDivider />
-                    <MenuItem>Your Servers</MenuItem>
-                    <MenuItem>Account Settings</MenuItem>
-                    <MenuItem>Logout</MenuItem>
+                    <MenuItem>Profile</MenuItem>
+                    <MenuItem onClick={() => handleLogout()}>Logout</MenuItem>
                     <MenuItem onClick={() => handleDisconnectWalletClick()}>
                       Disconnect Wallet
                     </MenuItem>

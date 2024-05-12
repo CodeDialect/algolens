@@ -7,13 +7,17 @@ import Nav from "./component/Navbar";
 import { PeraWalletConnect } from "@perawallet/connect";
 
 const App = () => {
-
   const [accountAddress, setAccountAddress] = useState("" as string | null);
 
   const peraWallet = new PeraWalletConnect({
     chainId: 416002,
   });
-  
+
+  const getUsername = (key: string): string => {
+    const username = localStorage.getItem(key);
+    return username !== null ? username : "";
+  };
+
   useEffect(() => {
     // Reconnect to the session when the component is mounted
     peraWallet.reconnectSession().then((accounts) => {
@@ -23,9 +27,9 @@ const App = () => {
     });
   });
 
-
   function handleDisconnectWalletClick() {
     peraWallet.disconnect();
+    localStorage.removeItem("username");
     setAccountAddress(null);
   }
 
@@ -42,7 +46,6 @@ const App = () => {
       });
   }
 
-
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -51,14 +54,44 @@ const App = () => {
   }, []);
 
   return (
-    <Nav accountAddress={accountAddress} handleConnectWalletClick={handleConnectWalletClick} handleDisconnectWalletClick={handleDisconnectWalletClick}>
-    <Router>
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/login" render={() => <LoginPage accountAddress={accountAddress} peraWallet={peraWallet}/>} />
-        <Route path="/profile" component={ProfilePage} />
-      </Switch>
-    </Router>
+    <Nav
+      username={getUsername("username")}
+      accountAddress={accountAddress}
+      peraWallet={peraWallet}
+      handleConnectWalletClick={handleConnectWalletClick}
+      handleDisconnectWalletClick={handleDisconnectWalletClick}
+    >
+      <Router>
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() =>
+              accountAddress && getUsername("username") === "" ? (
+                <LoginPage
+                  peraWallet={peraWallet}
+                  accountAddress={accountAddress}
+                />
+              ) : (
+                <Home />
+              )
+            }
+          />
+          <Route
+            path="/profile"
+            render={() =>
+              accountAddress && getUsername("username") !== "" ? (
+                <ProfilePage username={getUsername("username")} />
+              ) : (
+                <LoginPage
+                  peraWallet={peraWallet}
+                  accountAddress={accountAddress}
+                />
+              )
+            }
+          />
+        </Switch>
+      </Router>
     </Nav>
   );
 };

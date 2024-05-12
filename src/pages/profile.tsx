@@ -9,11 +9,14 @@ import {
   Flex,
   Image,
 } from "@chakra-ui/react";
-import { useEffect } from "react";
 import Post from "../component/Post";
 import TweetModal from "../component/Inputmodal";
 
-const ProfilePage = () => {
+interface ProfileProps {
+  username: string;
+}
+
+const ProfilePage = ({ username } : ProfileProps) => {
 
   return (
     <Flex
@@ -53,7 +56,7 @@ const ProfilePage = () => {
               Lindsey James
             </Heading>
             <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
-              @lindsey_jam3s
+              {`@${username}` }
             </Text>
             <Text
               textAlign={"center"}
@@ -101,16 +104,6 @@ const ProfilePage = () => {
               justifyContent={"space-between"}
               alignItems={"center"}
             >
-              <Button
-                flex={1}
-                fontSize={"sm"}
-                rounded={"full"}
-                _focus={{
-                  bg: "gray.200",
-                }}
-              >
-                Message
-              </Button>
               <Button
                 flex={1}
                 fontSize={"sm"}

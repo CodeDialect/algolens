@@ -15,12 +15,10 @@ import {
   Spinner,
   useToast,
 } from "@chakra-ui/react";
-import { fetchUsers } from "../database/fetch";
-import { base64ToUTF8String, utf8ToBase64String } from "../utils/conversion";
-import { indexerClient } from "../utils/constants";
 import { createUser } from "../utils/buyUsername";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { signin } from "../utils/sigin";
+import { checkUser } from "../utils/checkUser";
 
 interface LoginProps {
   peraWallet: PeraWalletConnect;
@@ -86,6 +84,18 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   };
 
   const handleLogin = async (username: string) => {
+    const response = await checkUser(username);
+    if (response === "Username is available") {
+      toast({
+        title: "Error",
+        description: "Username not found",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return;
+    }
+
     if (username.trim() === "") {
       toast({
         title: "Error",
@@ -119,14 +129,29 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       return;
     }
     try {
+      setIsLoading(true);
       await signin(username, accountAddress, peraWallet, op);
-      toast({
-        title: "Success",
-        description: "User logged in successfully",
-        status: "success",
-        duration: 9000,
-        isClosable: true,
-      });
+
+      if (localStorage.getItem("username") === username) {
+        toast({
+          title: "Success",
+          description: "User logged in successfully",
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+        setIsLoading(false);
+        window.location.reload();
+      } else {
+        toast({
+          title: "Error",
+          description: "User login failed",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+      setIsLoading(false);
     } catch (err) {
       toast({
         title: "Error",
@@ -135,80 +160,32 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
     }
   };
 
-  const handleUsernameKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (isSignup) {
-      checkUsernameAvailability(e.currentTarget.value);
-    }
-  };
-
-  const checkUsernameAvailability = async (username: string) => {
-    if (username.trim() === "") {
+  const handleUsernameKeyUp = async (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.currentTarget.value.trim() === "") {
       return;
     }
 
-    if (username.length < 3) {
+    if (e.currentTarget.value.length < 3) {
       setIsUsernameAvailable(false);
       return;
     }
-    console.log(username);
-    try {
+
+    if (isSignup) {
       setIsLoading(true);
-      let userNames: string[] = [];
-      const appIds = await fetchUsers();
-      console.log("appIds", appIds);
-      if (appIds.length === 0) {
+      const response = await checkUser(e.currentTarget.value);
+      console.log(response);
+      if (response === "Username is available") {
         setIsUsernameAvailable(true);
-        setIsLoading(false);
-        return;
+      } else {
+        setIsUsernameAvailable(false);
       }
-      const getField = (
-        fieldName:
-          | WithImplicitCoercion<string>
-          | { [Symbol.toPrimitive](hint: "string"): string },
-        globalState: any[]
-      ) => {
-        return globalState.find((state) => {
-          return state.key === utf8ToBase64String(fieldName);
-        });
-      };
-
-      await Promise.all(
-        appIds.map(async (item: any) => {
-          let transactionInfo = await indexerClient
-            .lookupApplications(item.appId)
-            .includeAll(true)
-            .do();
-
-          if (transactionInfo.application.deleted) {
-            return null;
-          }
-          let globalState = transactionInfo.application.params["global-state"];
-
-          if (getField("USERNAME", globalState) !== undefined) {
-            let field = getField("USERNAME", globalState).value.bytes;
-            userNames.push(base64ToUTF8String(field));
-          }
-          console.log("userNames", userNames);
-          if (userNames.some((name) => name === username)) {
-            setIsUsernameAvailable(false);
-          } else {
-            setIsUsernameAvailable(true);
-          }
-        })
-      );
       setIsLoading(false);
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: "Something went wrong",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-      console.log(err);
     }
   };
 
@@ -291,7 +268,9 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
           }}
           width="full"
           isDisabled={
-            !isUsernameAvailable || isLoading || username.trim() === ""
+            isSignup
+              ? !isUsernameAvailable || isLoading || username.trim() === ""
+              : isLoading
           }
         >
           {isSignup ? "Buy Username" : "Sign in"}

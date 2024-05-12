@@ -8,14 +8,19 @@ import { fetchUsers } from "../database/fetch";
 interface UserData {
   username: string | undefined;
   owner: string;
+  appId: number;
 }
 
 export const signin = async (
   username: string,
-  senderAddress: string,
+  senderAddress: string | null,
   perawallet: PeraWalletConnect,
   op: string
 ) => {
+  const setUser = async (key: string, value: string) => {
+    localStorage.setItem(key, value);
+  };
+
   const operation = new TextEncoder().encode(op);
 
   let params = await algodClient.getTransactionParams().do();
@@ -24,6 +29,10 @@ export const signin = async (
   const user = new TextEncoder().encode(username);
 
   try {
+    if (senderAddress === null) {
+      throw new Error("Please connect your wallet");
+    }
+
     const appIds = await fetchUsers();
     const getField = (
       fieldName:
@@ -38,7 +47,6 @@ export const signin = async (
     let userData: UserData[] = [];
     await Promise.all(
       appIds.map(async (item: any) => {
-        console.log(item.appId);
         let transactionInfo = await indexerClient
           .lookupApplications(item.appId)
           .includeAll(true)
@@ -51,7 +59,6 @@ export const signin = async (
         let owner = transactionInfo.application.params.creator;
         let registeredUsername;
         let appId = transactionInfo.application.id;
-        console.log(transactionInfo);
         if (getField("USERNAME", globalState) !== undefined) {
           let field = getField("USERNAME", globalState).value.bytes;
           registeredUsername = base64ToUTF8String(field);
@@ -59,64 +66,73 @@ export const signin = async (
         userData.push({
           username: registeredUsername,
           owner: owner,
+          appId: appId,
         });
 
-        console.log(userData);
+        const filteredAppId = userData.filter(data => data.username === username.toLowerCase() && data.owner === senderAddress);
+        
+        if(filteredAppId.length === 0) {
+          return null
+        };
+        
+        const userAppId = filteredAppId[0].appId;
+
         if (
-          userData.some((data) => data.username?.toLowerCase() === username.toLowerCase()) &&
+          userData.some(
+            (data) => data.username?.toLowerCase() === username.toLowerCase()
+          ) &&
           userData.some((data) => data.owner === senderAddress)
         ) {
-          console.log("Signed in");
           let appArgs = [operation, user];
-          console.log(op);
-          const signTxn = algosdk.makeApplicationCallTxnFromObject({
-            from: senderAddress,
-            appIndex: appId,
-            onComplete: algosdk.OnApplicationComplete.NoOpOC,
-            suggestedParams: params,
-            appArgs: appArgs,
-          });
-
-          const singleTransaction: SignerTransaction[] = [
-            {
-              txn: signTxn,
-              signers: [senderAddress],
-            },
-          ];
-
-          let txId = signTxn.txID().toString();
-
           try {
+            const signTxn = algosdk.makeApplicationCallTxnFromObject({
+              from: senderAddress,
+              appIndex: userAppId,
+              onComplete: algosdk.OnApplicationComplete.NoOpOC,
+              suggestedParams: params,
+              appArgs: appArgs,
+            });
+
+            const singleTransaction: SignerTransaction[] = [
+              {
+                txn: signTxn,
+                signers: [senderAddress],
+              },
+            ];
+
+            let txId = signTxn.txID().toString();
+
             const signedTxn = await perawallet.signTransaction([
               singleTransaction,
             ]);
-            console.log(signedTxn);
-            const result = await algodClient
+            await algodClient
               .sendRawTransaction(signedTxn)
               .do()
               .catch((err) => {
                 console.log(err);
               });
-            console.log("Result: ", result);
+            let confirmedTxn = await algosdk.waitForConfirmation(
+              algodClient,
+              txId,
+              4
+            );
+            console.log(
+              "Transaction " +
+                txId +
+                " confirmed in round " +
+                confirmedTxn["confirmed-round"]
+            );
+            if (op === "logout") {
+              localStorage.removeItem("username");
+            }
+
+            if (op === "login") {
+              setUser("username", username);
+            }
+            console.log("Signed transaction with txID: %s", txId);
           } catch (error) {
             console.log("Couldn't sign Opt-in txns", error);
           }
-          console.log("Signed transaction with txID: %s", txId);
-
-          // Wait for transaction to be confirmed
-          let confirmedTxn = await algosdk.waitForConfirmation(
-            algodClient,
-            txId,
-            4
-          );
-
-          // Get the completed Transaction
-          console.log(
-            "Transaction " +
-              txId +
-              " confirmed in round " +
-              confirmedTxn["confirmed-round"]
-          );
         }
       })
     );
