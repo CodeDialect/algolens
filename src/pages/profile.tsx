@@ -11,19 +11,22 @@ import {
 } from "@chakra-ui/react";
 import Post from "../component/Post";
 import TweetModal from "../component/Inputmodal";
+import { PeraWalletConnect } from "@perawallet/connect";
 
 interface ProfileProps {
   username: string;
+  accountAddress: string | null;
+  peraWallet: PeraWalletConnect;
 }
 
-const ProfilePage = ({ username } : ProfileProps) => {
+const ProfilePage = ({ username, accountAddress, peraWallet } : ProfileProps) => {
 
   return (
     <Flex
       h={"100vh"}
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
-      <TweetModal />
+      <TweetModal username={username} senderAddress={accountAddress} peraWallet={peraWallet}/>
       <Flex
         direction={"column"}
         w={"100%"}

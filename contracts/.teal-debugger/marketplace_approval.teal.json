@@ -1,0 +1,16 @@
+{
+    "appGlobals": {},
+    "assetParams": {},
+    "accountParams": {},
+    "appParams": {},
+    "accounts": {},
+    "args": {},
+    "txn": {
+        "ApplicationID": 0
+    },
+    "gtxn": {},
+    "txnSideEffects": {},
+    "gaid": {},
+    "globals": {},
+    "logState": []
+}

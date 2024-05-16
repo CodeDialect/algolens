@@ -12,8 +12,6 @@ import {
   Button,
 } from "@chakra-ui/react";
 import TwitterSidebar from "../component/Sidebar";
-import { useEffect } from "react";
-import { LinkIcon, StarIcon } from "@chakra-ui/icons";
 import Post from "../component/Post";
 export const Home = () => {
 

@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { signin } from "../utils/sigin";
 import { PeraWalletConnect } from "@perawallet/connect";
+import { post } from "../utils/post";
 
 interface NavProps {
   children: React.ReactNode;
@@ -53,6 +54,9 @@ export default function Nav({
 
   return (
     <>
+      <Button onClick={() => post(username, accountAddress, peraWallet, "")}>
+        Post
+      </Button>
       <Box
         backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
         px={4}

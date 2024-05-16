@@ -13,8 +13,20 @@ import {
   ModalFooter,
   Image,
 } from "@chakra-ui/react";
+import { post } from "../utils/post";
+import { PeraWalletConnect } from "@perawallet/connect";
 
-const TweetModal = () => {
+interface TweetModalProps {
+  username: string;
+  senderAddress: string | null;
+  peraWallet: PeraWalletConnect;
+}
+
+const TweetModal = ({
+  username,
+  senderAddress,
+  peraWallet,
+}: TweetModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [tweet, setTweet] = useState("");
 
@@ -32,8 +44,9 @@ const TweetModal = () => {
     setTweet(event.target.value);
   };
 
-  const handleTweetSubmit = () => {
+  const handleTweetSubmit = async () => {
     // Handle tweet submission logic here
+    await post(username, senderAddress, peraWallet, tweet);
     console.log("Tweet submitted:", tweet);
     handleCloseModal();
   };

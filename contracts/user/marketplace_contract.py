@@ -6,12 +6,12 @@ class SocialMedia:
         owner = Bytes("OWNER")
         price = Bytes("PRICE")
         login_status = Bytes("LOGINSTATUS")
-
+        post_count = Bytes("POSTCOUNT")
     class AppMethods:
         signup = Bytes("signup")
         login = Bytes("login")
         logout = Bytes("logout")
-
+ 
     def application_creation(self):
         return Seq([
             App.globalPut(self.Variables.username, Txn.application_args[0]),
@@ -70,7 +70,14 @@ class SocialMedia:
         ])
         
         return If(validateUser).Then(update_state).Else(Reject())
+
     
+    def update_post_count(self):
+        return Seq([
+            App.globalPut(self.Variables.post_count, App.globalGet(self.Variables.post_count) + Int(1)),
+            Approve()
+        ])
+
     def application_deletion(self):
         return Return(Txn.sender() == Global.creator_address())
 

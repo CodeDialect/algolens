@@ -19,9 +19,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    // Reconnect to the session when the component is mounted
     peraWallet.reconnectSession().then((accounts) => {
-      // Setup the disconnect event listener
       peraWallet.connector?.on("disconnect", handleDisconnectWalletClick);
       setAccountAddress(accounts[0]);
     });
@@ -81,7 +79,7 @@ const App = () => {
             path="/profile"
             render={() =>
               accountAddress && getUsername("username") !== "" ? (
-                <ProfilePage username={getUsername("username")} />
+                <ProfilePage username={getUsername("username")} accountAddress={accountAddress} peraWallet={peraWallet}/>
               ) : (
                 <LoginPage
                   peraWallet={peraWallet}

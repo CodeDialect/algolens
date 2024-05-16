@@ -1,0 +1,244 @@
+#pragma version 6
+txn ApplicationID
+int 0
+==
+bnz main_l20
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l19
+txna ApplicationArgs 0
+byte "signup"
+==
+bnz main_l16
+txna ApplicationArgs 0
+byte "login"
+==
+bnz main_l13
+txna ApplicationArgs 0
+byte "logout"
+==
+bnz main_l10
+txna ApplicationArgs 0
+byte "update_post_count"
+==
+bnz main_l9
+txna ApplicationArgs 0
+byte "update_post"
+==
+bnz main_l8
+err
+main_l8:
+txna ApplicationArgs 1
+callsub storedescription_1
+int 1
+return
+main_l9:
+byte "POSTCOUNT"
+byte "POSTCOUNT"
+app_global_get
+int 1
++
+app_global_put
+int 1
+return
+main_l10:
+byte "USERNAME"
+app_global_get
+txna ApplicationArgs 1
+==
+byte "OWNER"
+app_global_get
+txn Sender
+==
+&&
+byte "LOGINSTATUS"
+app_global_get
+int 1
+==
+&&
+bnz main_l12
+int 0
+return
+main_l12:
+byte "LOGINSTATUS"
+int 0
+app_global_put
+int 1
+return
+main_l13:
+byte "USERNAME"
+app_global_get
+txna ApplicationArgs 1
+==
+byte "OWNER"
+app_global_get
+txn Sender
+==
+&&
+byte "LOGINSTATUS"
+app_global_get
+int 0
+==
+&&
+bnz main_l15
+int 0
+return
+main_l15:
+byte "LOGINSTATUS"
+int 1
+app_global_put
+int 1
+return
+main_l16:
+global GroupSize
+int 2
+==
+gtxn 1 TypeEnum
+int pay
+==
+gtxn 1 Amount
+int 1
+==
+&&
+gtxn 1 Sender
+gtxn 0 Sender
+==
+&&
+&&
+bnz main_l18
+int 0
+return
+main_l18:
+byte "USERNAME"
+txna ApplicationArgs 1
+app_global_put
+byte "OWNER"
+txn Sender
+app_global_put
+byte "PRICE"
+int 0
+app_global_put
+byte "LOGINSTATUS"
+int 0
+app_global_put
+int 1
+return
+main_l19:
+txn Sender
+global CreatorAddress
+==
+return
+main_l20:
+byte "USERNAME"
+txna ApplicationArgs 0
+app_global_put
+byte "OWNER"
+txn Sender
+app_global_put
+byte "PRICE"
+int 1
+app_global_put
+int 1
+return
+
+// convert_uint_to_bytes
+convertuinttobytes_0:
+store 7
+load 7
+int 0
+==
+bnz convertuinttobytes_0_l5
+byte ""
+store 8
+load 7
+store 9
+convertuinttobytes_0_l2:
+load 9
+int 0
+>
+bnz convertuinttobytes_0_l4
+load 8
+b convertuinttobytes_0_l6
+convertuinttobytes_0_l4:
+load 9
+int 10
+%
+store 10
+byte "0123456789"
+load 10
+load 10
+int 1
++
+substring3
+load 8
+concat
+store 8
+load 9
+int 10
+/
+store 9
+b convertuinttobytes_0_l2
+convertuinttobytes_0_l5:
+byte "0"
+convertuinttobytes_0_l6:
+retsub
+
+// store_description
+storedescription_1:
+store 0
+load 0
+len
+store 2
+int 0
+store 1
+storedescription_1_l1:
+load 1
+int 8
+<
+bz storedescription_1_l7
+load 1
+callsub convertuinttobytes_0
+store 6
+int 127
+load 1
+*
+store 4
+load 2
+int 0
+==
+bnz storedescription_1_l7
+load 2
+int 127
+>
+bnz storedescription_1_l6
+load 2
+store 3
+load 2
+load 3
+-
+store 2
+storedescription_1_l5:
+load 0
+load 4
+load 3
+extract3
+store 5
+load 6
+load 5
+app_global_put
+load 1
+int 1
++
+store 1
+b storedescription_1_l1
+storedescription_1_l6:
+load 2
+int 127
+-
+store 2
+int 127
+store 3
+b storedescription_1_l5
+storedescription_1_l7:
+retsub
