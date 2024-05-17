@@ -1,4 +1,4 @@
-import { fetchUsers } from "../database/fetch";
+import { fetchData } from "../database/fetch";
 import { indexerClient } from "./constants";
 import { base64ToUTF8String, utf8ToBase64String } from "./conversion";
 
@@ -13,7 +13,7 @@ export const checkUser = async (username: string):Promise<string> => {
   console.log(username);
   try {
     let userNames: string[] = [];
-    const appIds = await fetchUsers();
+    const appIds = await fetchData("users");
     console.log("appIds", appIds);
     if (appIds.length === 0) {
       return "Username is available";
@@ -29,6 +29,7 @@ export const checkUser = async (username: string):Promise<string> => {
       });
     };
 
+    try{
     await Promise.all(
       appIds.map(async (item: any) => {
         let transactionInfo = await indexerClient
@@ -53,6 +54,9 @@ export const checkUser = async (username: string):Promise<string> => {
       return "Username is available";
     }
   } catch (err) {
+    console.log(err);
+    return "Something went wrong";
+  }} catch (err) {
     console.log(err);
     return "Something went wrong";
   }

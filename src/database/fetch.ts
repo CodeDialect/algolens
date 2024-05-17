@@ -1,8 +1,9 @@
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "./firebase";
-
-export const fetchUsers: () => Promise<any> = async () =>
-  await getDocs(collection(db, "users"))
+export const fetchData: (document: string) => Promise<any> = async (
+  document: string
+) =>
+  await getDocs(collection(db, document))
     .then((querySnapshot) => {
       const newData = querySnapshot.docs.map((doc) => ({
         ...doc.data(),

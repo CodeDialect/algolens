@@ -85,7 +85,6 @@ const TweetModal = ({
               <Avatar
                 size="md"
                 name="John Doe"
-                src="https://example.com/avatar.jpg"
               />
               <Textarea
                 value={tweet}

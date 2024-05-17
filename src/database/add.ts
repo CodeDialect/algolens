@@ -2,10 +2,10 @@ import { addDoc, collection } from "firebase/firestore";
 import { db } from "./firebase";
 
 
-export const appIdDB = async (appId: number) => {
+export const appIdDB = async (appId: number, document: string) => {
     console.log("Adding appId to database...");
     try {
-      const docRef = await addDoc(collection(db, "posts"), {
+      const docRef = await addDoc(collection(db, document), {
         appId: appId.toString(),
       }).catch((err) => {
         console.log(err);

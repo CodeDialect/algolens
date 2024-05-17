@@ -10,7 +10,7 @@ import { utf8ToBase64String, base64ToUTF8String } from "./conversion";
 import algosdk from "algosdk";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { fetchUsers } from "../database/fetch";
+import { fetchData } from "../database/fetch";
 import { appIdDB } from "../database/add";
 
 interface UserData {
@@ -63,7 +63,7 @@ export const post = async (
       throw new Error("Please connect your wallet");
     }
 
-    const appIds = await fetchUsers();
+    const appIds = await fetchData("users");
     const getField = (
       fieldName:
         | WithImplicitCoercion<string>
@@ -117,72 +117,107 @@ export const post = async (
           ) &&
           userData.some((data) => data.owner === senderAddress)
         ) {
-          const userId = new TextEncoder().encode(userAppId.toString());
-          const post = new TextEncoder().encode(postContent);
-          let appPostArgs = [post, userId];
-          let txn = algosdk.makeApplicationCreateTxnFromObject({
+          const user = new TextEncoder().encode(userData[0].username);
+          const loginCheckOp = new TextEncoder().encode("check_post");
+          const args = [loginCheckOp, user];
+
+          const loginTnx = algosdk.makeApplicationCallTxnFromObject({
             from: senderAddress,
             suggestedParams: params,
+            appIndex: userAppId,
+            appArgs: args,
             onComplete: algosdk.OnApplicationComplete.NoOpOC,
-            approvalProgram: compiledApprovalProgram,
-            clearProgram: compiledClearProgram,
-            numLocalInts: numLocalInts,
-            numLocalByteSlices: numLocalBytes,
-            numGlobalInts: numGlobalInts,
-            numGlobalByteSlices: numGlobalBytes,
-            appArgs: appPostArgs,
           });
 
-          const singleTransaction: SignerTransaction[] = [
+          const signTransaction: SignerTransaction[] = [
             {
-              txn: txn,
+              txn: loginTnx,
               signers: [senderAddress],
             },
           ];
-
-          let txId = txn.txID().toString();
-
+          console.log(signTransaction);
+          console.log(args);
           try {
             const signedTxn = await perawallet.signTransaction([
-              singleTransaction,
+              signTransaction,
             ]);
             console.log(signedTxn);
             await algodClient
               .sendRawTransaction(signedTxn[0])
               .do()
+              .then(async () => {
+                const userId = new TextEncoder().encode(userAppId.toString());
+                const post = new TextEncoder().encode(postContent);
+                let appPostArgs = [post, userId];
+                let txn = algosdk.makeApplicationCreateTxnFromObject({
+                  from: senderAddress,
+                  suggestedParams: params,
+                  onComplete: algosdk.OnApplicationComplete.NoOpOC,
+                  approvalProgram: compiledApprovalProgram,
+                  clearProgram: compiledClearProgram,
+                  numLocalInts: numLocalInts,
+                  numLocalByteSlices: numLocalBytes,
+                  numGlobalInts: numGlobalInts,
+                  numGlobalByteSlices: numGlobalBytes,
+                  appArgs: appPostArgs,
+                });
+
+                const singleTransaction: SignerTransaction[] = [
+                  {
+                    txn: txn,
+                    signers: [senderAddress],
+                  },
+                ];
+
+                let txId = txn.txID().toString();
+
+                try {
+                  const signedTxn = await perawallet.signTransaction([
+                    singleTransaction,
+                  ]);
+                  console.log(signedTxn);
+                  await algodClient
+                    .sendRawTransaction(signedTxn[0])
+                    .do()
+                    .catch((err) => {
+                      console.log(err);
+                    });
+                } catch (error) {
+                  console.log("Couldn't sign Opt-in txns", error);
+                }
+                console.log("Signed transaction with txID: %s", txId);
+
+                // Wait for transaction to be confirmed
+                let confirmedTxn = await algosdk.waitForConfirmation(
+                  algodClient,
+                  txId,
+                  4
+                );
+
+                // Get the completed Transaction
+                console.log(
+                  "Transaction " +
+                    txId +
+                    " confirmed in round " +
+                    confirmedTxn["confirmed-round"]
+                );
+
+                // Get created application id and notify about completion
+                let transactionResponse = await algodClient
+                  .pendingTransactionInformation(txId)
+                  .do();
+                console.log("Transaction Response", transactionResponse);
+                let postAppId = transactionResponse["application-index"];
+                appIdDB(postAppId, "posts");
+                console.log(transactionResponse);
+                console.log("Created new app-id: ", postAppId);
+              })
               .catch((err) => {
                 console.log(err);
               });
           } catch (error) {
-            console.log("Couldn't sign Opt-in txns", error);
+            console.log(error);
           }
-          console.log("Signed transaction with txID: %s", txId);
-
-          // Wait for transaction to be confirmed
-          let confirmedTxn = await algosdk.waitForConfirmation(
-            algodClient,
-            txId,
-            4
-          );
-
-          // Get the completed Transaction
-          console.log(
-            "Transaction " +
-              txId +
-              " confirmed in round " +
-              confirmedTxn["confirmed-round"]
-          );
-
-          // Get created application id and notify about completion
-          let transactionResponse = await algodClient
-            .pendingTransactionInformation(txId)
-            .do();
-          console.log("Transaction Response", transactionResponse);
-          let appId = transactionResponse["application-index"];
-          appIdDB(appId);
-          console.log(transactionResponse);
-          console.log("Created new app-id: ", appId);
-          console.log(algosdk.getApplicationAddress(appId));
         }
       })
     );

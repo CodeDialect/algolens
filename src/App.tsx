@@ -5,6 +5,7 @@ import ProfilePage from "./pages/profile";
 import { useEffect, useState } from "react";
 import Nav from "./component/Navbar";
 import { PeraWalletConnect } from "@perawallet/connect";
+import { base64ToUTF8String } from "./utils/conversion";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("" as string | null);
@@ -12,6 +13,8 @@ const App = () => {
   const peraWallet = new PeraWalletConnect({
     chainId: 416002,
   });
+
+  console.log(base64ToUTF8String("UE9TVENPVU5U"))
 
   const getUsername = (key: string): string => {
     const username = localStorage.getItem(key);
@@ -71,7 +74,7 @@ const App = () => {
                   accountAddress={accountAddress}
                 />
               ) : (
-                <Home />
+                <Home username={getUsername("username")}/>
               )
             }
           />

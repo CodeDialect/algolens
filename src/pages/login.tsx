@@ -194,7 +194,6 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       minH="100vh"
       align="center"
       justify="center"
-      bgImage="url('https://png.pngtree.com/thumb_back/fh260/background/20230713/pngtree-3d-rendered-envelopes-featuring-chat-icons-image_3862596.jpg')"
       bgPosition="center"
       bgRepeat="no-repeat"
       bgSize="cover"

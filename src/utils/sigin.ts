@@ -3,7 +3,7 @@ import { utf8ToBase64String, base64ToUTF8String } from "./conversion";
 import algosdk from "algosdk";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { fetchUsers } from "../database/fetch";
+import { fetchData } from "../database/fetch";
 
 interface UserData {
   username: string | undefined;
@@ -33,7 +33,7 @@ export const signin = async (
       throw new Error("Please connect your wallet");
     }
 
-    const appIds = await fetchUsers();
+    const appIds = await fetchData("users");
     const getField = (
       fieldName:
         | WithImplicitCoercion<string>

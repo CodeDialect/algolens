@@ -11,6 +11,7 @@ class SocialMedia:
         signup = Bytes("signup")
         login = Bytes("login")
         logout = Bytes("logout")
+        check_post = Bytes("check_post")
  
     def application_creation(self):
         return Seq([
@@ -70,13 +71,21 @@ class SocialMedia:
         ])
         
         return If(validateUser).Then(update_state).Else(Reject())
-
     
-    def update_post_count(self):
-        return Seq([
-            App.globalPut(self.Variables.post_count, App.globalGet(self.Variables.post_count) + Int(1)),
-            Approve()
+    def check_post(self):
+        username = Txn.application_args[1]
+        
+        assert_valid_username = App.globalGet(self.Variables.username) == username
+        assert_valid_login = App.globalGet(self.Variables.login_status) == Int(1)
+        assert_owner_address = App.globalGet(self.Variables.owner) == Txn.sender()
+        
+        can_post = And(assert_valid_username, assert_valid_login, assert_owner_address)
+        
+        approve_post = Seq([
+           Approve() 
         ])
+        
+        return If(can_post).Then(approve_post).Else(Reject())
 
     def application_deletion(self):
         return Return(Txn.sender() == Global.creator_address())
@@ -88,6 +97,7 @@ class SocialMedia:
             [Txn.application_args[0] == self.AppMethods.signup, self.signup()],
             [Txn.application_args[0] == self.AppMethods.login, self.login()],
             [Txn.application_args[0] == self.AppMethods.logout, self.logout()],
+            [Txn.application_args[0] == self.AppMethods.check_post, self.check_post()],
         )
 
     def approval_program(self):

@@ -1,6 +1,5 @@
 import { StarIcon, LinkIcon } from "@chakra-ui/icons";
 import {
-  Stack,
   Box,
   Card,
   Text,
@@ -14,31 +13,36 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 
+interface PostData {
+  post: string | undefined;
+  likes: string;
+  time: Date;
+  post_by: string | undefined;
+  owner_address: string | undefined;
+  username: string | undefined;
+}
 
-const Post = () => {
+interface PostProps {
+  postData: PostData[];
+  width?: string;
+}
+
+const Post: React.FC<PostProps> = ({ postData, width }) => {
   const [isLiked, setIsLiked] = useState(false);
-
+  console.log("postData: ", postData);
   const handleLike = () => {
     setIsLiked(!isLiked);
   };
   return (
-    // <Stack
-    //   m={"0 0 0 0"}
-    //   overflowY="auto"
-    //   maxHeight="calc(100vh - 30px)"
-    //   width="100%"
-    // >
-      // <div
-      //   style={{
-      //     minHeight: `${height}`,
-      //     overflowY: "scroll",
-      //     scrollbarWidth: "none",
-      //     msOverflowStyle: "none",
-      //     display: "flex",
-      //     justifyContent: "center",
-      //   }}
-      // >
-        <Card m={"50px"} data-type="Card" maxW="50rem" height="fit-content">
+    <>
+      {postData.map((post, index) => (
+        <Card
+          key={index}
+          m={"10px 50px 50px 50px"}
+          data-type="Card"
+          w={width ? width : "80vw"}
+          height="fit-content"
+        >
           <CardHeader data-type="CardHeader">
             <Flex data-type="Flex">
               <Flex
@@ -48,26 +52,18 @@ const Post = () => {
                 alignItems="center"
                 flexWrap="wrap"
               >
-                <Avatar
-                  data-type="Avatar"
-                  name="Segun Adebayo"
-                  src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NzF8fHBvcnRyYWl0fGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60"
-                ></Avatar>
+                <Avatar data-type="Avatar"></Avatar>
                 <Box data-type="Box">
                   <Heading data-type="Heading" size="sm">
-                    Aloïs Pierre
+                    {post.username}
                   </Heading>
-                  <Text data-type="Text">Creator of Studio 23</Text>
+                  <Text data-type="Text">{post.time.toLocaleString()}</Text>
                 </Box>
               </Flex>
             </Flex>
           </CardHeader>
           <CardBody data-type="CardBody">
-            <Text data-type="Text">
-              With Chakra UI, I wanted to sync the speed of development with the
-              speed of design. I wanted the developer to be just as excited as
-              the designer to create a screen.
-            </Text>
+            <Text data-type="Text">{post.post}</Text>
           </CardBody>
           <CardFooter
             data-type="CardFooter"
@@ -91,10 +87,15 @@ const Post = () => {
             <Button data-type="Button" flex="1" leftIcon={<LinkIcon />}>
               Share
             </Button>
+            <Flex alignItems="center" color="gray.500" ml={"10px"}>
+              <StarIcon boxSize={5} />
+              <Text ml={1}>{post.likes} Likes</Text>
+            </Flex>
           </CardFooter>
         </Card>
-      // </div>
-    // </Stack>
+      ))}
+      {console.log("postData in post", postData)}
+    </>
   );
 };
 

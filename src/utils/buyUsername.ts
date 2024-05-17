@@ -146,7 +146,47 @@ export const createUser = async (
   let signedTxn = await perawallet.signTransaction([multipleTxnGroups]);
   console.log("Signed group transaction");
   console.log(signedTxn);
-  let tx = await algodClient.sendRawTransaction(signedTxn).do();
+
+  let tx = await algodClient
+    .sendRawTransaction(signedTxn)
+    .do()
+    .catch(async (err) => {
+      let delAppTxn = algosdk.makeApplicationDeleteTxnFromObject({
+        from: senderAddress,
+        appIndex: appId,
+        suggestedParams: params,
+      });
+
+      const singleTransaction: SignerTransaction[] = [
+        {
+          txn: delAppTxn,
+          signers: [senderAddress],
+        },
+      ];
+
+      let signedDelAppTxn = await perawallet.signTransaction([
+        singleTransaction,
+      ]);
+
+      console.log(signedDelAppTxn);
+
+      let delAppTx = await algodClient
+        .sendRawTransaction(signedDelAppTxn[0])
+        .do();
+      console.log(delAppTx);
+
+      let confirmedDelAppTxn = await algosdk.waitForConfirmation(
+        algodClient,
+        delAppTx.txId,
+        4
+      );
+      console.log(
+        "Transaction " +
+          delAppTx.txId +
+          " confirmed in round " +
+          confirmedDelAppTxn["confirmed-round"]
+      );
+    });
   console.log(
     "Transaction " +
       tx +
@@ -155,6 +195,6 @@ export const createUser = async (
   );
 
   console.log("Transaction: ", tx);
-  appIdDB(appId);
+  appIdDB(appId, "users");
   return appId;
 };

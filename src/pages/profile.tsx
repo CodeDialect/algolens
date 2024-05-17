@@ -12,6 +12,10 @@ import {
 import Post from "../component/Post";
 import TweetModal from "../component/Inputmodal";
 import { PeraWalletConnect } from "@perawallet/connect";
+import { useEffect, useState } from "react";
+import { fetchData } from "../database/fetch";
+import { indexerClient } from "../utils/constants";
+import { fetchAndProcessPosts, PostData } from "../utils/fetchposts";
 
 interface ProfileProps {
   username: string;
@@ -19,14 +23,41 @@ interface ProfileProps {
   peraWallet: PeraWalletConnect;
 }
 
-const ProfilePage = ({ username, accountAddress, peraWallet } : ProfileProps) => {
+const ProfilePage = ({
+  username,
+  accountAddress,
+  peraWallet,
+}: ProfileProps) => {
+  const [postData, setPostData] = useState<PostData[]>([]);
+
+  const handlePosts = async () => {
+
+    await fetchAndProcessPosts(
+      setPostData,
+      username,
+      true
+    );
+
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await handlePosts();
+    };
+
+    fetchData();
+  }, [fetchData, indexerClient, setPostData, username]);
 
   return (
     <Flex
       h={"100vh"}
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
-      <TweetModal username={username} senderAddress={accountAddress} peraWallet={peraWallet}/>
+      <TweetModal
+        username={username}
+        senderAddress={accountAddress}
+        peraWallet={peraWallet}
+      />
       <Flex
         direction={"column"}
         w={"100%"}
@@ -35,7 +66,7 @@ const ProfilePage = ({ username, accountAddress, peraWallet } : ProfileProps) =>
       >
         <Stack
           borderWidth="1px"
-          borderRadius="lg"
+          borderRadius="0.5rem 0.5rem 0 0"
           w={"80%"}
           m={"20px 20px 0px 20px"}
           height={{ sm: "476px", md: "20rem" }}
@@ -56,10 +87,10 @@ const ProfilePage = ({ username, accountAddress, peraWallet } : ProfileProps) =>
             pt={2}
           >
             <Heading fontSize={"2xl"} fontFamily={"body"}>
-              Lindsey James
+              {username}
             </Heading>
             <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
-              {`@${username}` }
+              {`@${username}`}
             </Text>
             <Text
               textAlign={"center"}
@@ -136,7 +167,7 @@ const ProfilePage = ({ username, accountAddress, peraWallet } : ProfileProps) =>
           display="flex"
           justifyContent="center"
           alignItems={"center"}
-          >
+        >
           <div
             style={{
               overflowY: "scroll",
@@ -144,8 +175,7 @@ const ProfilePage = ({ username, accountAddress, peraWallet } : ProfileProps) =>
               scrollbarWidth: "none",
             }}
           >
-            <Post />
-            <Post />
+            <Post postData={postData} />
           </div>
         </Stack>
       </Flex>

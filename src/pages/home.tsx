@@ -1,19 +1,34 @@
 import {
-  Card,
-  CardHeader,
-  CardBody,
-  Text,
-  Box,
-  Heading,
   Stack,
   Flex,
-  Avatar,
-  CardFooter,
-  Button,
 } from "@chakra-ui/react";
 import TwitterSidebar from "../component/Sidebar";
 import Post from "../component/Post";
-export const Home = () => {
+import { useState, useEffect } from "react";
+import { PostData, fetchAndProcessPosts } from "../utils/fetchposts";
+
+interface Props {
+  username: string;
+}
+
+export const Home = ({ username }: Props) => {
+  const [postData, setPostData] = useState<PostData[]>([]);
+
+  const handlePosts = async () => {
+    await fetchAndProcessPosts(
+      setPostData,
+      username,
+      false
+    );
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await handlePosts();
+    };
+
+    fetchData();
+  }, [fetchAndProcessPosts, setPostData, username]);
 
   return (
     <Flex
@@ -34,9 +49,7 @@ export const Home = () => {
             msOverflowStyle: "none",
           }}
         >
-          <Post />
-          <Post />
-          <Post />
+          <Post postData={postData} width="90%" />
         </div>
       </Stack>
     </Flex>

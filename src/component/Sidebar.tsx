@@ -35,7 +35,7 @@ const TwitterSidebar = () => {
       </Flex>
       <Flex justifyContent="center" mt="auto" mb="8">
         <Link display="flex" alignItems="center">
-          <Avatar size="md" name="User" src="https://bit.ly/broken-link" />
+          <Avatar size="md" name="User" />
         </Link>
       </Flex>
     </StyledSidebar>
