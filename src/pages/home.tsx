@@ -1,25 +1,21 @@
-import {
-  Stack,
-  Flex,
-} from "@chakra-ui/react";
+import { Stack, Flex } from "@chakra-ui/react";
 import TwitterSidebar from "../component/Sidebar";
 import Post from "../component/Post";
 import { useState, useEffect } from "react";
 import { PostData, fetchAndProcessPosts } from "../utils/fetchposts";
+import { PeraWalletConnect } from "@perawallet/connect";
 
 interface Props {
   username: string;
+  peraWallet: PeraWalletConnect;
+  accountAddress: string | null;
 }
 
-export const Home = ({ username }: Props) => {
+export const Home = ({ username, peraWallet, accountAddress }: Props) => {
   const [postData, setPostData] = useState<PostData[]>([]);
 
   const handlePosts = async () => {
-    await fetchAndProcessPosts(
-      setPostData,
-      username,
-      false
-    );
+    await fetchAndProcessPosts(setPostData, username, false);
   };
 
   useEffect(() => {
@@ -49,7 +45,13 @@ export const Home = ({ username }: Props) => {
             msOverflowStyle: "none",
           }}
         >
-          <Post postData={postData} width="90%" />
+          <Post
+            username={username}
+            accountAddress={accountAddress}
+            peraWallet={peraWallet}
+            postData={postData}
+            width="90%"
+          />
         </div>
       </Stack>
     </Flex>

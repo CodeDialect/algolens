@@ -34,7 +34,7 @@ const TwitterSidebar = () => {
         </Link>
       </Flex>
       <Flex justifyContent="center" mt="auto" mb="8">
-        <Link display="flex" alignItems="center">
+        <Link href="/profile" display="flex" alignItems="center" style={{ textDecoration: "none" }}>
           <Avatar size="md" name="User" />
         </Link>
       </Flex>

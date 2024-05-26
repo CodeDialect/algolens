@@ -2,18 +2,31 @@
 txn ApplicationID
 int 0
 ==
-bnz main_l4
+bnz main_l6
 txn OnCompletion
 int DeleteApplication
 ==
-bnz main_l3
+bnz main_l5
+txna ApplicationArgs 0
+byte "increment_likes"
+==
+bnz main_l4
 err
-main_l3:
+main_l4:
+byte "LIKES"
+byte "LIKES"
+app_global_get
+int 1
++
+app_global_put
+int 1
+return
+main_l5:
 txn Sender
 global CreatorAddress
 ==
 return
-main_l4:
+main_l6:
 byte "POST"
 txna ApplicationArgs 0
 app_global_put

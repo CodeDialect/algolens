@@ -1,15 +1,9 @@
-import { algodClient, indexerClient } from "./constants";
-import { utf8ToBase64String, base64ToUTF8String } from "./conversion";
+import { algodClient } from "./constants";
 import algosdk from "algosdk";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { fetchData } from "../database/fetch";
+import { fetchUsers } from "./fetchUsers";
 
-interface UserData {
-  username: string | undefined;
-  owner: string;
-  appId: number;
-}
 
 export const signin = async (
   username: string,
@@ -28,47 +22,15 @@ export const signin = async (
   params.flatFee = true;
   const user = new TextEncoder().encode(username);
 
+  if (senderAddress === null) {
+    throw new Error("Please connect your wallet");
+  }
+
   try {
-    if (senderAddress === null) {
-      throw new Error("Please connect your wallet");
-    }
-
-    const appIds = await fetchData("users");
-    const getField = (
-      fieldName:
-        | WithImplicitCoercion<string>
-        | { [Symbol.toPrimitive](hint: "string"): string },
-      globalState: any[]
-    ) => {
-      return globalState.find((state) => {
-        return state.key === utf8ToBase64String(fieldName);
-      });
-    };
-    let userData: UserData[] = [];
-    await Promise.all(
-      appIds.map(async (item: any) => {
-        let transactionInfo = await indexerClient
-          .lookupApplications(item.appId)
-          .includeAll(true)
-          .do();
-
-        if (transactionInfo.application.deleted) {
-          return null;
+        const userData = await fetchUsers();
+        if(userData === undefined) {
+          return null
         }
-        let globalState = transactionInfo.application.params["global-state"];
-        let owner = transactionInfo.application.params.creator;
-        let registeredUsername;
-        let appId = transactionInfo.application.id;
-        if (getField("USERNAME", globalState) !== undefined) {
-          let field = getField("USERNAME", globalState).value.bytes;
-          registeredUsername = base64ToUTF8String(field);
-        }
-        userData.push({
-          username: registeredUsername,
-          owner: owner,
-          appId: appId,
-        });
-
         const filteredAppId = userData.filter(data => data.username === username.toLowerCase() && data.owner === senderAddress);
         
         if(filteredAppId.length === 0) {
@@ -134,8 +96,6 @@ export const signin = async (
             console.log("Couldn't sign Opt-in txns", error);
           }
         }
-      })
-    );
   } catch (err) {
     console.log(err);
   }

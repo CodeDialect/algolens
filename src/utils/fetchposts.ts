@@ -28,7 +28,7 @@ export const fetchAndProcessPosts = async (
     });
   };
 
-  const processedPosts: PostData[] = await Promise.all(
+  await Promise.all(
     postIds.map(async (item: { appId: number }) => {
       let transactionInfo = await indexerClient
         .lookupApplications(item.appId)

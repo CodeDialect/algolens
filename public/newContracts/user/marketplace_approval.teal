@@ -2,50 +2,54 @@
 txn ApplicationID
 int 0
 ==
-bnz main_l20
+bnz main_l24
 txn OnCompletion
 int DeleteApplication
 ==
-bnz main_l19
+bnz main_l23
 txna ApplicationArgs 0
 byte "signup"
 ==
-bnz main_l16
+bnz main_l20
 txna ApplicationArgs 0
 byte "login"
 ==
-bnz main_l13
+bnz main_l17
 txna ApplicationArgs 0
 byte "logout"
 ==
-bnz main_l10
+bnz main_l14
+txna ApplicationArgs 0
+byte "update_picture"
+==
+bnz main_l11
 txna ApplicationArgs 0
 byte "check_post"
 ==
-bnz main_l7
+bnz main_l8
 err
-main_l7:
+main_l8:
 byte "USERNAME"
 app_global_get
 txna ApplicationArgs 1
 ==
-byte "LOGINSTATUS"
-app_global_get
-int 1
-==
-&&
 byte "OWNER"
 app_global_get
 txn Sender
 ==
 &&
-bnz main_l9
-int 0
-return
-main_l9:
+byte "LOGINSTATUS"
+app_global_get
 int 1
+==
+&&
+bnz main_l10
+int 0
 return
 main_l10:
+int 1
+return
+main_l11:
 byte "USERNAME"
 app_global_get
 txna ApplicationArgs 1
@@ -60,16 +64,40 @@ app_global_get
 int 1
 ==
 &&
-bnz main_l12
+bnz main_l13
 int 0
-return
-main_l12:
-byte "LOGINSTATUS"
-int 0
-app_global_put
-int 1
 return
 main_l13:
+byte "PICTURE"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+main_l14:
+byte "USERNAME"
+app_global_get
+txna ApplicationArgs 1
+==
+byte "OWNER"
+app_global_get
+txn Sender
+==
+&&
+byte "LOGINSTATUS"
+app_global_get
+int 1
+==
+&&
+bnz main_l16
+int 0
+return
+main_l16:
+byte "LOGINSTATUS"
+int 0
+app_global_put
+int 1
+return
+main_l17:
 byte "USERNAME"
 app_global_get
 txna ApplicationArgs 1
@@ -84,16 +112,16 @@ app_global_get
 int 0
 ==
 &&
-bnz main_l15
+bnz main_l19
 int 0
 return
-main_l15:
+main_l19:
 byte "LOGINSTATUS"
 int 1
 app_global_put
 int 1
 return
-main_l16:
+main_l20:
 global GroupSize
 int 2
 ==
@@ -109,10 +137,10 @@ gtxn 0 Sender
 ==
 &&
 &&
-bnz main_l18
+bnz main_l22
 int 0
 return
-main_l18:
+main_l22:
 byte "USERNAME"
 txna ApplicationArgs 1
 app_global_put
@@ -125,14 +153,17 @@ app_global_put
 byte "LOGINSTATUS"
 int 0
 app_global_put
+byte "PICTURE"
+byte ""
+app_global_put
 int 1
 return
-main_l19:
+main_l23:
 txn Sender
 global CreatorAddress
 ==
 return
-main_l20:
+main_l24:
 byte "USERNAME"
 txna ApplicationArgs 0
 app_global_put

@@ -11,7 +11,9 @@ import {
   CardFooter,
   Button,
 } from "@chakra-ui/react";
+import { PeraWalletConnect } from "@perawallet/connect";
 import { useState } from "react";
+import { Like } from "../utils/like";
 
 interface PostData {
   post: string | undefined;
@@ -25,18 +27,40 @@ interface PostData {
 interface PostProps {
   postData: PostData[];
   width?: string;
+  username: string;
+  accountAddress: string | null;
+  peraWallet: PeraWalletConnect;
 }
 
-const Post: React.FC<PostProps> = ({ postData, width }) => {
-  const [isLiked, setIsLiked] = useState(false);
-  console.log("postData: ", postData);
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-  };
+const Post: React.FC<PostProps> = ({
+  postData,
+  width,
+  username,
+  accountAddress,
+  peraWallet,
+}) => {
+  // const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
+
+  // const handleLike = async (
+  //   index: number,
+  //   username: string,
+  //   accountAddress: string | null,
+  //   peraWallet: PeraWalletConnect,
+  //   postBy: string | undefined
+  // ) => {
+  //   await Like(username, accountAddress, peraWallet, postBy);
+
+  //   setLikedPosts((prevLikedPosts) => ({
+  //     ...prevLikedPosts,
+  //     [index]: !prevLikedPosts[index],
+  //   }));
+  // };
+
   return (
     <>
       {postData.map((post, index) => (
         <Card
+          background={"linear-gradient(45deg, rgb(167 143 221), #6b46fe)"}
           key={index}
           m={"10px 50px 50px 50px"}
           data-type="Card"
@@ -70,31 +94,14 @@ const Post: React.FC<PostProps> = ({ postData, width }) => {
             justify="space-between"
             flexWrap="wrap"
           >
-            <Button
-              transition="all 0.3s ease-in-out"
-              _active={{ transform: "scale(0.9)", color: "blue.500" }}
-              onClick={handleLike}
-              colorScheme={isLiked ? "blue" : undefined}
-              data-type="Button"
-              mr="2"
-              flex="1"
-              leftIcon={
-                <StarIcon color={isLiked ? "yellow.500" : "gray.500"} />
-              }
-            >
-              Like
-            </Button>
             <Button data-type="Button" flex="1" leftIcon={<LinkIcon />}>
               Share
             </Button>
-            <Flex alignItems="center" color="gray.500" ml={"10px"}>
-              <StarIcon boxSize={5} />
-              <Text ml={1}>{post.likes} Likes</Text>
+            <Flex alignItems="center" color="black" ml={"10px"}>
             </Flex>
           </CardFooter>
         </Card>
       ))}
-      {console.log("postData in post", postData)}
     </>
   );
 };

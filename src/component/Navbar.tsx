@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { signin } from "../utils/sigin";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { post } from "../utils/post";
+
 
 interface NavProps {
   children: React.ReactNode;
@@ -127,7 +127,6 @@ export default function Nav({
                     </Center>
                     <br />
                     <MenuDivider />
-                    <MenuItem>Profile</MenuItem>
                     <MenuItem onClick={() => handleLogout()}>Logout</MenuItem>
                     <MenuItem onClick={() => handleDisconnectWalletClick()}>
                       Disconnect Wallet

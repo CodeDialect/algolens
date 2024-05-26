@@ -12,9 +12,7 @@ const App = () => {
 
   const peraWallet = new PeraWalletConnect({
     chainId: 416002,
-  });
-
-  console.log(base64ToUTF8String("UE9TVENPVU5U"))
+  });            
 
   const getUsername = (key: string): string => {
     const username = localStorage.getItem(key);
@@ -74,7 +72,7 @@ const App = () => {
                   accountAddress={accountAddress}
                 />
               ) : (
-                <Home username={getUsername("username")}/>
+                <Home accountAddress={accountAddress} peraWallet={peraWallet} username={getUsername("username")}/>
               )
             }
           />
