@@ -3,7 +3,6 @@ import { indexerClient } from "./constants";
 import { base64ToUTF8String, utf8ToBase64String } from "./conversion";
 export interface PostData {
   post: string | undefined;
-  likes: string;
   time: Date;
   post_by: string | undefined;
   owner_address: string | undefined;
@@ -55,7 +54,6 @@ export const fetchAndProcessPosts = async (
 
         newPostData.push({
           post: base64ToUTF8String(getField("POST", globalState).value.bytes),
-          likes: getField("LIKES", globalState).value.uint,
           time: new Date(getField("TIME", globalState).value.uint * 1000),
           post_by,
           owner_address: transactionInfo.application.params.creator,
