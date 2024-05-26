@@ -18,7 +18,6 @@ import { UserData } from "../utils/fetchUsers";
 
 interface PostData {
   post: string | undefined;
-  likes: string;
   time: Date;
   post_by: string | undefined;
   owner_address: string | undefined;
