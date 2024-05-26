@@ -1,6 +1,8 @@
 import { Box, Flex, Text, Link, Icon, Avatar } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
 import { FiHome, FiHash, FiBell, FiMail } from "react-icons/fi";
 import styled from "styled-components";
+import { UserData, fetchUsers } from "../utils/fetchUsers";
 
 const StyledSidebar = styled(Box)`
   background: linear-gradient(195deg, rgb(213 196 196), rgb(88 26 232));
@@ -12,7 +14,30 @@ const StyledSidebar = styled(Box)`
   padding: 16px;
 `;
 
-const TwitterSidebar = () => {
+interface SidebarProps {
+  accountAddress: string | null;
+  username: string;
+}
+
+
+const TwitterSidebar = ({ accountAddress, username }: SidebarProps) => {
+  const [userData, setUserData] = useState<UserData[]>();
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      setUserData(await fetchUsers());
+    };
+
+    fetchUserData();
+  });
+
+  const user =
+    userData &&
+    userData.find(
+      (user) => user.owner === accountAddress && user.username === username
+    );
+  const profilePicture = user && user.profilePicture ? user.profilePicture : "";
+
   return (
     <StyledSidebar>
       <Flex direction="column" alignItems="flex-start" width="100%" textAlign={"center"}>
@@ -35,7 +60,7 @@ const TwitterSidebar = () => {
       </Flex>
       <Flex justifyContent="center" mt="auto" mb="8">
         <Link href="/profile" display="flex" alignItems="center" style={{ textDecoration: "none" }}>
-          <Avatar size="md" name="User" />
+          <Avatar size="md" name="User" src={profilePicture}/>
         </Link>
       </Flex>
     </StyledSidebar>

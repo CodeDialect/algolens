@@ -18,7 +18,8 @@ import {
 } from "@chakra-ui/react";
 import { signin } from "../utils/sigin";
 import { PeraWalletConnect } from "@perawallet/connect";
-
+import { useEffect, useState } from "react";
+import { fetchUsers, UserData } from "../utils/fetchUsers";
 
 interface NavProps {
   children: React.ReactNode;
@@ -39,6 +40,15 @@ export default function Nav({
 }: NavProps) {
   const toast = useToast();
 
+  const [userData, setUserData] = useState<UserData[]>();
+  useEffect(() => {
+    const fetchUserData = async () => {
+      setUserData(await fetchUsers());
+    };
+
+    fetchUserData();
+  });
+
   const handleLogout = async () => {
     if (username !== "" && accountAddress) {
       await signin(username, accountAddress, peraWallet, "logout");
@@ -52,6 +62,12 @@ export default function Nav({
     }
   };
 
+  const user =
+    userData &&
+    userData.find(
+      (user) => user.owner === accountAddress && user.username === username
+    );
+  const profilePicture = user && user.profilePicture ? user.profilePicture : "";
   return (
     <>
       <Box
@@ -106,19 +122,14 @@ export default function Nav({
                     cursor={"pointer"}
                     minW={0}
                   >
-                    <Avatar
-                      size={"sm"}
-                      src={"https://avatars.dicebear.com/api/male/username.svg"}
-                    />
+                    <Avatar size={"sm"} src={profilePicture} />
                   </MenuButton>
                   <MenuList alignItems={"center"}>
                     <br />
                     <Center>
                       <Avatar
                         size={"2xl"}
-                        src={
-                          "https://avatars.dicebear.com/api/male/username.svg"
-                        }
+                        src={profilePicture}
                       />
                     </Center>
                     <br />

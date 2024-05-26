@@ -4,6 +4,7 @@ import Post from "../component/Post";
 import { useState, useEffect } from "react";
 import { PostData, fetchAndProcessPosts } from "../utils/fetchposts";
 import { PeraWalletConnect } from "@perawallet/connect";
+import { fetchUsers, UserData } from "../utils/fetchUsers";
 
 interface Props {
   username: string;
@@ -13,7 +14,7 @@ interface Props {
 
 export const Home = ({ username, peraWallet, accountAddress }: Props) => {
   const [postData, setPostData] = useState<PostData[]>([]);
-
+  const [userData, setUserData] = useState<UserData[]>();
   const handlePosts = async () => {
     await fetchAndProcessPosts(setPostData, username, false);
   };
@@ -23,14 +24,19 @@ export const Home = ({ username, peraWallet, accountAddress }: Props) => {
       await handlePosts();
     };
 
+    const fetchUserData = async () => {
+      setUserData(await fetchUsers());
+    };
+
+    fetchUserData();
     fetchData();
-  }, [fetchAndProcessPosts, setPostData, username]);
+  }, [fetchAndProcessPosts, setPostData, username, fetchUsers, setUserData]);
 
   return (
     <Flex
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
-      <TwitterSidebar />
+      <TwitterSidebar accountAddress={accountAddress} username={username}/>
       <Stack
         m={"0 0 0 0"}
         overflowY="auto"
@@ -50,6 +56,7 @@ export const Home = ({ username, peraWallet, accountAddress }: Props) => {
             accountAddress={accountAddress}
             peraWallet={peraWallet}
             postData={postData}
+            userData={userData}
             width="90%"
           />
         </div>
