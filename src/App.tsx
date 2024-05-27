@@ -5,7 +5,6 @@ import ProfilePage from "./pages/profile";
 import { useEffect, useState } from "react";
 import Nav from "./component/Navbar";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { base64ToUTF8String } from "./utils/conversion";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("" as string | null);
