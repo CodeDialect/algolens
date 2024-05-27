@@ -17,7 +17,18 @@ export const Home = ({ username, peraWallet, accountAddress }: Props) => {
   const [userData, setUserData] = useState<UserData[]>();
   const toast = useToast();
   const handlePosts = async () => {
-    await fetchAndProcessPosts(setPostData, username, false);
+    try {
+      await fetchAndProcessPosts(setPostData, username, false);
+    } catch (err) {
+      console.log(err);
+      toast({
+        title: "Error",
+        description: "An error occurred while fetching and processing posts.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   useEffect(() => {
@@ -35,7 +46,7 @@ export const Home = ({ username, peraWallet, accountAddress }: Props) => {
           status: "error",
           duration: 9000,
           isClosable: true,
-        })
+        });
       } else {
         setUserData(result);
       }
