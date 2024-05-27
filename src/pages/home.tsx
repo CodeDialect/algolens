@@ -25,7 +25,12 @@ export const Home = ({ username, peraWallet, accountAddress }: Props) => {
     };
 
     const fetchUserData = async () => {
-      setUserData(await fetchUsers());
+      const result = await fetchUsers();
+      if (typeof result === "string") {
+        setUserData([]);
+      } else {
+        setUserData(result);
+      }
     };
 
     fetchUserData();
@@ -36,7 +41,7 @@ export const Home = ({ username, peraWallet, accountAddress }: Props) => {
     <Flex
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
-      <TwitterSidebar accountAddress={accountAddress} username={username}/>
+      <TwitterSidebar accountAddress={accountAddress} username={username} />
       <Stack
         m={"0 0 0 0"}
         overflowY="auto"

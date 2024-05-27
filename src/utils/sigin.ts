@@ -31,7 +31,8 @@ export const signin = async (
         if(userData === undefined) {
           return null
         }
-        const filteredAppId = userData.filter(data => data.username === username.toLowerCase() && data.owner === senderAddress);
+        if(userData.length !== 0 && typeof userData !== "string") {
+          const filteredAppId = userData.filter(data => data.username === username.toLowerCase() && data.owner === senderAddress);
         
         if(filteredAppId.length === 0) {
           return null
@@ -94,7 +95,8 @@ export const signin = async (
             console.log("Signed transaction with txID: %s", txId);
           } catch (error) {
             console.log("Couldn't sign Opt-in txns", error);
-          }
+          }  
+        }
         }
   } catch (err) {
     console.log(err);

@@ -43,7 +43,12 @@ export default function Nav({
   const [userData, setUserData] = useState<UserData[]>();
   useEffect(() => {
     const fetchUserData = async () => {
-      setUserData(await fetchUsers());
+      const result = await fetchUsers();
+      if (typeof result === "string") {
+        setUserData([]);
+      } else {
+        setUserData(result);
+      }
     };
 
     fetchUserData();
@@ -127,14 +132,14 @@ export default function Nav({
                   <MenuList alignItems={"center"}>
                     <br />
                     <Center>
-                      <Avatar
-                        size={"2xl"}
-                        src={profilePicture}
-                      />
+                      <Avatar size={"2xl"} src={profilePicture} />
                     </Center>
                     <br />
                     <Center>
-                      <p>{username}</p>
+                      <p>
+                        {username.charAt(0).toUpperCase() +
+                          username.slice(1).toLowerCase()}
+                      </p>
                     </Center>
                     <br />
                     <MenuDivider />

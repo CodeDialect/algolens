@@ -34,7 +34,18 @@ const ProfilePage = ({
   const toast = useToast();
 
   const handlePosts = async () => {
-    await fetchAndProcessPosts(setPostData, username, true);
+    try {
+      await fetchAndProcessPosts(setPostData, username, true);
+    } catch (err) {
+      console.log(err);
+      toast({
+        title: "Error",
+        description: "An error occurred while fetching and processing posts.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleFileChange = async (
@@ -127,7 +138,19 @@ const ProfilePage = ({
       await handlePosts();
     };
     const fetchUserData = async () => {
-      setUserData(await fetchUsers());
+      const result = await fetchUsers();
+      if (typeof result === "string") {
+        setUserData([]);
+        toast({
+          title: "Error",
+          description: result,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        })
+      } else {
+        setUserData(result);
+      }
     };
 
     fetchData();
@@ -224,7 +247,8 @@ const ProfilePage = ({
             pt={2}
           >
             <Heading fontSize={"2xl"} fontFamily={"body"}>
-              {username}
+              {username.charAt(0).toUpperCase() +
+                username.slice(1).toLowerCase()}
             </Heading>
             <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
               {`@${username}`}

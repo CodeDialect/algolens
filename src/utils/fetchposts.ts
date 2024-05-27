@@ -18,6 +18,10 @@ export const fetchAndProcessPosts = async (
   const postIds = await fetchData("posts");
   const userIds = await fetchData("users");
 
+  if (postIds === undefined || userIds === undefined) {
+    return "Something went wrong!";
+  }
+
   console.log("postIds:", postIds);
   console.log("userIds:", userIds);
 
@@ -27,41 +31,51 @@ export const fetchAndProcessPosts = async (
     });
   };
 
-  await Promise.all(
-    postIds.map(async (item: { appId: number }) => {
-      let transactionInfo = await indexerClient
-        .lookupApplications(item.appId)
-        .includeAll(true)
-        .do();
-      let globalState = transactionInfo.application.params["global-state"];
+  const maxTries = 3;
+  for (let i = 0; i < maxTries; i++) {
+    try {
+      await Promise.all(
+        postIds.map(async (item: { appId: number }) => {
+          let transactionInfo = await indexerClient
+            .lookupApplications(item.appId)
+            .includeAll(true)
+            .do();
+          let globalState = transactionInfo.application.params["global-state"];
 
-      const post_by = base64ToUTF8String(
-        getField("POSTBY", globalState).value.bytes
+          const post_by = base64ToUTF8String(
+            getField("POSTBY", globalState).value.bytes
+          );
+          const userAppId = userIds.find(
+            (user: { appId: string }) => user.appId === post_by
+          )?.appId;
+          if (userAppId) {
+            let userTransactionInfo = await indexerClient
+              .lookupApplications(userAppId)
+              .includeAll(true)
+              .do();
+            let userGlobalState =
+              userTransactionInfo.application.params["global-state"];
+            const users = base64ToUTF8String(
+              getField("USERNAME", userGlobalState).value.bytes
+            );
+
+            newPostData.push({
+              post: base64ToUTF8String(getField("POST", globalState).value.bytes),
+              time: new Date(getField("TIME", globalState).value.uint * 1000),
+              post_by,
+              owner_address: transactionInfo.application.params.creator,
+              username: users,
+            });
+          }
+        })
       );
-      const userAppId = userIds.find(
-        (user: { appId: string }) => user.appId === post_by
-      )?.appId;
-      if (userAppId) {
-        let userTransactionInfo = await indexerClient
-          .lookupApplications(userAppId)
-          .includeAll(true)
-          .do();
-        let userGlobalState =
-          userTransactionInfo.application.params["global-state"];
-        const users = base64ToUTF8String(
-          getField("USERNAME", userGlobalState).value.bytes
-        );
-
-        newPostData.push({
-          post: base64ToUTF8String(getField("POST", globalState).value.bytes),
-          time: new Date(getField("TIME", globalState).value.uint * 1000),
-          post_by,
-          owner_address: transactionInfo.application.params.creator,
-          username: users,
-        });
+      break; // Exit the loop if the request is successful
+    } catch (err) {
+      if (i === maxTries - 1) {
+        throw err; // Throw the error if all tries have been exhausted
       }
-    })
-  );
+    }
+  }
 
   console.log("newPostData:", newPostData);
 

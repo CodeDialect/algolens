@@ -25,7 +25,12 @@ const TwitterSidebar = ({ accountAddress, username }: SidebarProps) => {
   
   useEffect(() => {
     const fetchUserData = async () => {
-      setUserData(await fetchUsers());
+      const result = await fetchUsers();
+      if (typeof result === "string") {
+        setUserData([]);
+      } else {
+        setUserData(result);
+      }
     };
 
     fetchUserData();

@@ -64,6 +64,11 @@ export const post = async (
     }
 
     const appIds = await fetchData("users");
+
+    if(appIds.length === 0){ 
+      return "Something went wrong!";
+    }
+
     const getField = (
       fieldName:
         | WithImplicitCoercion<string>
@@ -105,22 +110,19 @@ export const post = async (
             data.owner === senderAddress
         );
 
+        console.log("filteredAppId", filteredAppId);
+
         if (filteredAppId.length === 0) {
           return null;
         }
 
-        const userAppId = filteredAppId[0].appId;
-
-        if (
-          userData.some(
-            (data) => data.username?.toLowerCase() === username.toLowerCase()
-          ) &&
-          userData.some((data) => data.owner === senderAddress)
-        ) {
-          const user = new TextEncoder().encode(userData[0].username);
+        console.log("UserData", filteredAppId[0].appId, filteredAppId[0].username);  
+          const userAppId = filteredAppId[0].appId
+          const user = new TextEncoder().encode(filteredAppId[0].username);
+          
           const loginCheckOp = new TextEncoder().encode("check_post");
           const args = [loginCheckOp, user];
-
+          
           const loginTnx = algosdk.makeApplicationCallTxnFromObject({
             from: senderAddress,
             suggestedParams: params,
@@ -218,7 +220,6 @@ export const post = async (
           } catch (error) {
             console.log(error);
           }
-        }
       })
     );
   } catch (error) {

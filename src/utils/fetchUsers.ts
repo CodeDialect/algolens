@@ -10,26 +10,32 @@ export interface UserData {
 }
 
 export const fetchUsers = async () => {
-    try {
-        const appIds = await fetchData("users");
-        const getField = (
-          fieldName:
-            | WithImplicitCoercion<string>
-            | { [Symbol.toPrimitive](hint: "string"): string },
-          globalState: any[]
-        ) => {
-          return globalState.find((state) => {
-            return state.key === utf8ToBase64String(fieldName);
-          });
-        };
-        let userData: UserData[] = [];
+  try {
+    const appIds = await fetchData("users");
+    if (appIds === undefined) {
+      return "Something went wrong!";
+    }
+
+    const getField = (
+      fieldName: string | { [Symbol.toPrimitive]: (hint: "string") => string },
+      globalState: any[]
+    ) => {
+      return globalState.find((state) => {
+        return state.key === utf8ToBase64String(fieldName);
+      });
+    };
+
+    const maxTries = 3;
+    let userData: UserData[] = [];
+    for (let i = 0; i < maxTries; i++) {
+      try {
         await Promise.all(
           appIds.map(async (item: any) => {
             let transactionInfo = await indexerClient
               .lookupApplications(item.appId)
               .includeAll(true)
               .do();
-    
+
             if (transactionInfo.application.deleted) {
               return null;
             }
@@ -52,10 +58,17 @@ export const fetchUsers = async () => {
               appId: appId,
               profilePicture: profilePicture,
             });
-        })
+          })
         );
-        return userData;
+        break; // Exit the loop if the request is successful
       } catch (err) {
-        console.log(err);
-      }  
-} 
+        if (i === maxTries - 1) {
+          console.error(err); // Throw the error if all tries have been exhausted
+        }
+      }
+    }
+    return userData;
+  } catch (err) {
+    console.log(err);
+  }
+};
