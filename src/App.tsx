@@ -5,13 +5,29 @@ import ProfilePage from "./pages/profile";
 import { useEffect, useState } from "react";
 import Nav from "./component/Navbar";
 import { PeraWalletConnect } from "@perawallet/connect";
+// import { fetchData } from "./database/fetch";
+import { Test } from "./pages/test";
+import Login from "./pages/login";
+import { postNote, userNote } from "./utils/constants";
+import {
+  fetchAppUser,
+  fetchUserPosts,
+  PostData,
+  updatePostBy,
+  UserData,
+} from "./utils/fetchData";
+import { Spinner } from "@chakra-ui/react";
 
 const App = () => {
-  const [accountAddress, setAccountAddress] = useState("" as string | null);
+  const [accountAddress, setAccountAddress] = useState("");
+  const [quotaError, setQuotaError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<UserData[]>();
+  const [postData, setPostData] = useState<PostData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const peraWallet = new PeraWalletConnect({
     chainId: 416002,
-  });            
+  });
 
   const getUsername = (key: string): string => {
     const username = localStorage.getItem(key);
@@ -23,12 +39,17 @@ const App = () => {
       peraWallet.connector?.on("disconnect", handleDisconnectWalletClick);
       setAccountAddress(accounts[0]);
     });
+
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   });
 
   function handleDisconnectWalletClick() {
     peraWallet.disconnect();
     localStorage.removeItem("username");
-    setAccountAddress(null);
+    setAccountAddress("");
   }
 
   function handleConnectWalletClick() {
@@ -45,23 +66,71 @@ const App = () => {
   }
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
+    async function fetchPostData() {
+      if (accountAddress) {
+        setIsLoading(true);
+        const posts = await fetchUserPosts(accountAddress, postNote);
+        if (typeof posts === "string") {
+          return posts;
+        }
+        setPostData(
+          posts.postsData.map((post) => ({
+            post: post.post,
+            owner: post.owner,
+            postBy: post.postBy,
+            timestamp: new Date(Number(post.timestamp) * 1000),
+          }))
+        );
+        setIsLoading(false);
+      }
+    }
+    fetchPostData();
+  }, [accountAddress, setPostData]);
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (accountAddress) {
+        setIsLoading(true);
+        const user = await fetchAppUser(accountAddress, userNote);
+        if (user) {
+          setUserData(user?.userData || []);
+        }
+        setIsLoading(false);
+      }
+    }
+    fetchUserData();
+  }, [accountAddress, setUserData]);
+
+  console.log(quotaError);
 
   return (
     <Nav
       username={getUsername("username")}
       accountAddress={accountAddress}
       peraWallet={peraWallet}
+      userData={userData}
       handleConnectWalletClick={handleConnectWalletClick}
       handleDisconnectWalletClick={handleDisconnectWalletClick}
     >
       <Router>
-        <Switch>
-          <Route
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <Switch>
+            <Route
+              exact
+              path="/"
+              render={() => (
+                <Home
+                  postsData={postData}
+                  userData={userData}
+                  username={getUsername("username")}
+                  peraWallet={peraWallet}
+                  accountAddress={accountAddress}
+                />
+              )}
+            />
+            {/* <Route
             exact
             path="/"
             render={() =>
@@ -71,7 +140,19 @@ const App = () => {
                   accountAddress={accountAddress}
                 />
               ) : (
-                <Home accountAddress={accountAddress} peraWallet={peraWallet} username={getUsername("username")}/>
+                <div>
+                  {quotaError ? (
+                    <div style={{  padding: "16px" }}>
+                      <h2>Error: {quotaError}</h2>
+                    </div>
+                  ) : (
+                    <Home
+                      accountAddress={accountAddress}
+                      peraWallet={peraWallet}
+                      username={getUsername("username")}
+                    />
+                  )}
+                </div>
               )
             }
           />
@@ -79,7 +160,11 @@ const App = () => {
             path="/profile"
             render={() =>
               accountAddress && getUsername("username") !== "" ? (
-                <ProfilePage username={getUsername("username")} accountAddress={accountAddress} peraWallet={peraWallet}/>
+                <ProfilePage
+                  username={getUsername("username")}
+                  accountAddress={accountAddress}
+                  peraWallet={peraWallet}
+                />
               ) : (
                 <LoginPage
                   peraWallet={peraWallet}
@@ -87,8 +172,10 @@ const App = () => {
                 />
               )
             }
-          />
-        </Switch>
+          /> */}
+            <Route path="/test" render={() => <Test />} />
+          </Switch>
+        )}
       </Router>
     </Nav>
   );

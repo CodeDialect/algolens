@@ -5,10 +5,12 @@ import {
   numGlobalInts,
   numLocalBytes,
   numLocalInts,
+  userNote,
 } from "./constants";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { appIdDB } from "../database/add";
+import { fetchAppUser } from "./fetchData";
+// import { appIdDB } from "../database/add";
 
 global.Buffer = global.Buffer || require("buffer").Buffer;
 
@@ -59,6 +61,12 @@ export const createUser = async (
 
   let appUserArgs = [signup, userName];
 
+  const user = await fetchAppUser(senderAddress, userNote);
+  console.log(user);
+  if (user) {
+    return "A Username already exists! with this address";
+  }
+
   let txn = algosdk.makeApplicationCreateTxnFromObject({
     from: senderAddress,
     suggestedParams: params,
@@ -69,6 +77,7 @@ export const createUser = async (
     numLocalByteSlices: numLocalBytes,
     numGlobalInts: numGlobalInts,
     numGlobalByteSlices: numGlobalBytes,
+    note: userNote,
     appArgs: [userName],
   });
 
@@ -110,14 +119,10 @@ export const createUser = async (
   let transactionResponse = await algodClient
     .pendingTransactionInformation(txId)
     .do();
-  console.log("Transaction Response", transactionResponse);
+
   let appId = transactionResponse["application-index"];
   let price = transactionResponse["global-state-delta"][1]["value"].uint;
 
-  console.log(transactionResponse);
-  console.log("Created new app-id: ", appId);
-  console.log(algosdk.getApplicationAddress(appId));
-  let signin = new TextEncoder().encode("login");
   // Create ApplicationCallTxn
   let appCallTxn = algosdk.makeApplicationCallTxnFromObject({
     from: senderAddress,
@@ -150,7 +155,7 @@ export const createUser = async (
   let tx = await algodClient
     .sendRawTransaction(signedTxn)
     .do()
-    .catch(async (err) => {
+    .catch(async () => {
       let delAppTxn = algosdk.makeApplicationDeleteTxnFromObject({
         from: senderAddress,
         appIndex: appId,
@@ -173,13 +178,12 @@ export const createUser = async (
       let delAppTx = await algodClient
         .sendRawTransaction(signedDelAppTxn[0])
         .do();
-      console.log(delAppTx);
-
       let confirmedDelAppTxn = await algosdk.waitForConfirmation(
         algodClient,
         delAppTx.txId,
         4
       );
+
       console.log(
         "Transaction " +
           delAppTx.txId +
@@ -187,14 +191,5 @@ export const createUser = async (
           confirmedDelAppTxn["confirmed-round"]
       );
     });
-  console.log(
-    "Transaction " +
-      tx +
-      " confirmed in round " +
-      confirmedTxn["confirmed-round"]
-  );
-
-  console.log("Transaction: ", tx);
-  appIdDB(appId, "users");
-  return appId;
+  return "User created successfully with txID: " + tx.txId;
 };

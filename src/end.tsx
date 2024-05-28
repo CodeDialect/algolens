@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { createProductAction, signIn } from "./utils/marketplace";
+// import { createProductAction, signIn } from "./utils/marketplace";
 import { Box, Button } from "@chakra-ui/react";
 import { base64ToUTF8String } from "./utils/conversion";
 import { signin } from "./utils/sigin";

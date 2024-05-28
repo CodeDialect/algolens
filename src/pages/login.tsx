@@ -64,18 +64,29 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     }
 
     try {
-      await createUser(peraWallet, accountAddress, { username: username });
-      toast({
-        title: "Success",
-        description: "User created successfully",
-        status: "success",
-        duration: 9000,
-        isClosable: true,
-      });
+      const response = await createUser(peraWallet, accountAddress, { username: username });
+      if(response.includes("User created successfully")) {
+        toast({
+          title: "Success",
+          description: response, // Corrected variable name
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        }); 
+      }
+      else{
+        toast({
+          title: "Error",
+          description: response, // Corrected variable name
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
     } catch (err) {
       toast({
         title: "Error",
-        description: "User creation failed",
+        description: "Something went wrong" + err, // Corrected variable name
         status: "error",
         duration: 9000,
         isClosable: true,
@@ -84,39 +95,39 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   };
 
   const handleLogin = async (username: string) => {
-    const response = await checkUser(username);
-    if (response === "Username is available") {
-      toast({
-        title: "Error",
-        description: "Username not found",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-      return;
-    }
+    // const response = await checkUser(username);
+    // if (response === "Username is available") {
+    //   toast({
+    //     title: "Error",
+    //     description: "Username not found",
+    //     status: "error",
+    //     duration: 9000,
+    //     isClosable: true,
+    //   });
+    //   return;
+    // }
 
-    if (username.trim() === "") {
-      toast({
-        title: "Error",
-        description: "Username cannot be empty",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-      return;
-    }
+    // if (username.trim() === "") {
+    //   toast({
+    //     title: "Error",
+    //     description: "Username cannot be empty",
+    //     status: "error",
+    //     duration: 9000,
+    //     isClosable: true,
+    //   });
+    //   return;
+    // }
 
-    if (username.length < 3) {
-      toast({
-        title: "Error",
-        description: "Username must be at least 3 characters",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-      return;
-    }
+    // if (username.length < 3) {
+    //   toast({
+    //     title: "Error",
+    //     description: "Username must be at least 3 characters",
+    //     status: "error",
+    //     duration: 9000,
+    //     isClosable: true,
+    //   });
+    //   return;
+    // }
 
     if (!accountAddress) {
       toast({
@@ -130,7 +141,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     }
     try {
       setIsLoading(true);
-      await signin(username, accountAddress, peraWallet, op);
+     const response = await signin(username, accountAddress, peraWallet, op);
 
       if (localStorage.getItem("username") === username) {
         toast({
@@ -145,7 +156,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       } else {
         toast({
           title: "Error",
-          description: "User login failed",
+          description: response,
           status: "error",
           duration: 9000,
           isClosable: true,
@@ -177,15 +188,15 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     }
 
     if (isSignup) {
-      setIsLoading(true);
-      const response = await checkUser(e.currentTarget.value);
-      console.log(response);
-      if (response === "Username is available") {
-        setIsUsernameAvailable(true);
-      } else {
-        setIsUsernameAvailable(false);
-      }
-      setIsLoading(false);
+      // setIsLoading(true);
+      // const response = await checkUser(e.currentTarget.value);
+      // console.log(response);
+      // if (response === "Username is available") {
+      //   setIsUsernameAvailable(true);
+      // } else {
+      //   setIsUsernameAvailable(false);
+      // }
+      // setIsLoading(false);
     }
   };
 

@@ -19,15 +19,18 @@ import {
 import { signin } from "../utils/sigin";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { useEffect, useState } from "react";
-import { fetchUsers, UserData } from "../utils/fetchUsers";
+import { UserData } from "../utils/fetchData";
+import { postNote, userNote } from "../utils/constants";
+import { post } from "../utils/post";
 
 interface NavProps {
   children: React.ReactNode;
-  accountAddress: string | null;
+  accountAddress: string;
   username: string;
   handleConnectWalletClick: () => void;
   handleDisconnectWalletClick: () => void;
   peraWallet: PeraWalletConnect;
+  userData: UserData[] | undefined;
 }
 
 export default function Nav({
@@ -37,42 +40,31 @@ export default function Nav({
   handleDisconnectWalletClick,
   peraWallet,
   username,
+  userData
 }: NavProps) {
   const toast = useToast();
-
-  const [userData, setUserData] = useState<UserData[]>();
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const result = await fetchUsers();
-      if (typeof result === "string") {
-        setUserData([]);
-      } else {
-        setUserData(result);
-      }
-    };
-
-    fetchUserData();
-  });
-
   const handleLogout = async () => {
     if (username !== "" && accountAddress) {
-      await signin(username, accountAddress, peraWallet, "logout");
+      const result = await signin(
+        username,
+        accountAddress,
+        peraWallet,
+        "logout"
+      );
       toast({
         title: "Success",
-        description: "Logged out successfully",
+        description: result,
         status: "success",
         duration: 9000,
         isClosable: true,
       });
     }
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
-  const user =
-    userData &&
-    userData.find(
-      (user) => user.owner === accountAddress && user.username === username
-    );
-  const profilePicture = user && user.profilePicture ? user.profilePicture : "";
+
   return (
     <>
       <Box
@@ -127,12 +119,22 @@ export default function Nav({
                     cursor={"pointer"}
                     minW={0}
                   >
-                    <Avatar size={"sm"} src={profilePicture} />
+                    <Avatar
+                      size={"sm"}
+                      src={
+                        userData
+                          ? userData[0].profilePicture
+                          : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDmELpn2iH-dqdj8jeC4RJ471P3VbIwr2C0OO1KntBPA&s"
+                      }
+                    />
                   </MenuButton>
                   <MenuList alignItems={"center"}>
                     <br />
                     <Center>
-                      <Avatar size={"2xl"} src={profilePicture} />
+                      <Avatar
+                        size={"2xl"}
+                        src={userData ? userData[0].profilePicture : ""}
+                      />
                     </Center>
                     <br />
                     <Center>

@@ -23,18 +23,18 @@ interface SidebarProps {
 const TwitterSidebar = ({ accountAddress, username }: SidebarProps) => {
   const [userData, setUserData] = useState<UserData[]>();
   
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const result = await fetchUsers();
-      if (typeof result === "string") {
-        setUserData([]);
-      } else {
-        setUserData(result);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     const result = await fetchUsers();
+  //     if (typeof result === "string") {
+  //       setUserData([]);
+  //     } else {
+  //       setUserData(result);
+  //     }
+  //   };
 
-    fetchUserData();
-  });
+  //   fetchUserData();
+  // });
 
   const user =
     userData &&

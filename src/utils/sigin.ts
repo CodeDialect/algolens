@@ -1,17 +1,21 @@
-import { algodClient } from "./constants";
+import { algodClient, indexerClient, userNote } from "./constants";
 import algosdk from "algosdk";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { fetchUsers } from "./fetchUsers";
-
+import { base64ToUTF8String, utf8ToBase64String } from "./conversion";
+import { fetchAppUser, fetchUserData } from "./fetchData";
 
 export const signin = async (
   username: string,
-  senderAddress: string | null,
+  senderAddress: string,
   perawallet: PeraWalletConnect,
   op: string
 ) => {
   const setUser = async (key: string, value: string) => {
+    if (value === "") {
+      localStorage.removeItem(key);
+    }
+
     localStorage.setItem(key, value);
   };
 
@@ -27,77 +31,91 @@ export const signin = async (
   }
 
   try {
-        const userData = await fetchUsers();
-        if(userData === undefined) {
-          return null
-        }
-        if(userData.length !== 0 && typeof userData !== "string") {
-          const filteredAppId = userData.filter(data => data.username === username.toLowerCase() && data.owner === senderAddress);
-        
-        if(filteredAppId.length === 0) {
-          return null
-        };
-        
-        const userAppId = filteredAppId[0].appId;
+    const user = await fetchAppUser(senderAddress, userNote);
 
-        if (
-          userData.some(
-            (data) => data.username?.toLowerCase() === username.toLowerCase()
-          ) &&
-          userData.some((data) => data.owner === senderAddress)
-        ) {
-          let appArgs = [operation, user];
-          try {
-            const signTxn = algosdk.makeApplicationCallTxnFromObject({
-              from: senderAddress,
-              appIndex: userAppId,
-              onComplete: algosdk.OnApplicationComplete.NoOpOC,
-              suggestedParams: params,
-              appArgs: appArgs,
-            });
+    if (user.appId === undefined) {
+      return "User not found";
+    }
+    
+    if (user.userData === null) {
+      return "User not found";
+    }
 
-            const singleTransaction: SignerTransaction[] = [
-              {
-                txn: signTxn,
-                signers: [senderAddress],
-              },
-            ];
+    if (user.userData[0].loginStatus === 1 && op === "login") {
+      return "User already logged in";
+    }
 
-            let txId = signTxn.txID().toString();
 
-            const signedTxn = await perawallet.signTransaction([
-              singleTransaction,
-            ]);
-            await algodClient
-              .sendRawTransaction(signedTxn)
-              .do()
-              .catch((err) => {
-                console.log(err);
-              });
-            let confirmedTxn = await algosdk.waitForConfirmation(
-              algodClient,
-              txId,
-              4
-            );
-            console.log(
-              "Transaction " +
-                txId +
-                " confirmed in round " +
-                confirmedTxn["confirmed-round"]
-            );
-            if (op === "logout") {
-              localStorage.removeItem("username");
-            }
+    // if (userData.length !== 0 && typeof userData !== "string") {
+    //   const filteredAppId = userData.filter(
+    //     (data) =>
+    //       data.username === username.toLowerCase() &&
+    //       data.owner === senderAddress
+    //   );
 
-            if (op === "login") {
-              setUser("username", username);
-            }
-            console.log("Signed transaction with txID: %s", txId);
-          } catch (error) {
-            console.log("Couldn't sign Opt-in txns", error);
-          }  
-        }
-        }
+    //   if (filteredAppId.length === 0) {
+    //     return null;
+    //   }
+
+    //   const userAppId = filteredAppId[0].appId;
+
+    //   if (
+    //     userData.some(
+    //       (data) => data.username?.toLowerCase() === username.toLowerCase()
+    //     ) &&
+    //     userData.some((data) => data.owner === senderAddress)
+    //   ) {
+    let appArgs = [operation, new TextEncoder().encode(user.userData[0].username)];
+    try {
+      const signTxn = algosdk.makeApplicationCallTxnFromObject({
+        from: senderAddress,
+        appIndex: user.appId,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        suggestedParams: params,
+        appArgs: appArgs,
+      });
+
+      const singleTransaction: SignerTransaction[] = [
+        {
+          txn: signTxn,
+          signers: [senderAddress],
+        },
+      ];
+
+      let txId = signTxn.txID().toString();
+
+      const signedTxn = await perawallet.signTransaction([singleTransaction]);
+      await algodClient
+        .sendRawTransaction(signedTxn)
+        .do()
+        .catch((err) => {
+          console.log(err);
+        });
+      let confirmedTxn = await algosdk.waitForConfirmation(
+        algodClient,
+        txId,
+        4
+      );
+      console.log(
+        "Transaction " +
+          txId +
+          " confirmed in round " +
+          confirmedTxn["confirmed-round"]
+      );
+      if (op === "logout") {
+        localStorage.removeItem("username");
+        return "logged out successfully";
+      }
+
+      if (op === "login") {
+        console.log(user.userData[0]);
+        setUser("username", user.userData[0].username ?? "");
+        return "logged in successfully";
+      }
+      console.log("Signed transaction with txID: %s", txId);
+    } catch (error) {
+      console.log("Couldn't sign Opt-in txns", error);
+    }
   } catch (err) {
     console.log(err);
   }

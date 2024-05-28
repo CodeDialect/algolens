@@ -16,8 +16,8 @@ export const indexerClient = new algosdk.Indexer(config.indexerToken, config.ind
 export const minRound = 29556983;
 
 // https://github.com/algorandfoundation/ARCs/blob/main/ARCs/arc-0002.md
-export const marketplaceNote = "sunnyceekay"
-
+export const userNote = new TextEncoder().encode("user-algolens")
+export const postNote = new TextEncoder().encode("post-algolens")
 // Maximum local storage allocation, immutable
 export const numLocalInts = 0;
 export const numLocalBytes = 0;

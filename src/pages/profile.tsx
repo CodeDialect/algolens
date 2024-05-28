@@ -11,7 +11,7 @@ import Post from "../component/Post";
 import TweetModal from "../component/Inputmodal";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { useEffect, useState } from "react";
-import { fetchData } from "../database/fetch";
+// import { fetchData } from "../database/fetch";
 import { indexerClient } from "../utils/constants";
 import { fetchAndProcessPosts, PostData } from "../utils/fetchposts";
 import { fetchUsers, UserData } from "../utils/fetchUsers";
@@ -133,36 +133,36 @@ const ProfilePage = ({
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await handlePosts();
-    };
-    const fetchUserData = async () => {
-      const result = await fetchUsers();
-      if (typeof result === "string") {
-        setUserData([]);
-        toast({
-          title: "Error",
-          description: result,
-          status: "error",
-          duration: 9000,
-          isClosable: true,
-        })
-      } else {
-        setUserData(result);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     await handlePosts();
+  //   };
+  //   const fetchUserData = async () => {
+  //     const result = await fetchUsers();
+  //     if (typeof result === "string") {
+  //       setUserData([]);
+  //       toast({
+  //         title: "Error",
+  //         description: result,
+  //         status: "error",
+  //         duration: 9000,
+  //         isClosable: true,
+  //       })
+  //     } else {
+  //       setUserData(result);
+  //     }
+  //   };
 
-    fetchData();
-    fetchUserData();
-  }, [
-    fetchData,
-    indexerClient,
-    setPostData,
-    fetchUsers,
-    setUserData,
-    username,
-  ]);
+  //   fetchData();
+  //   fetchUserData();
+  // }, [
+  //   fetchData,
+  //   indexerClient,
+  //   setPostData,
+  //   fetchUsers,
+  //   setUserData,
+  //   username,
+  // ]);
 
   const user = (userData ?? []).filter(
     (data) =>
@@ -304,13 +304,13 @@ const ProfilePage = ({
               scrollbarWidth: "none",
             }}
           >
-            <Post
+            {/* <Post
               username={username}
               accountAddress={accountAddress}
               peraWallet={peraWallet}
               postData={postData}
               userData={userData}
-            />
+            /> */}
           </div>
         </Stack>
       </Flex>

@@ -45,8 +45,7 @@ const TweetModal = ({
   };
 
   const handleTweetSubmit = async () => {
-    // Handle tweet submission logic here
-    await post(username, senderAddress, peraWallet, tweet);
+    await post(senderAddress, peraWallet, tweet);
     console.log("Tweet submitted:", tweet);
     handleCloseModal();
   };

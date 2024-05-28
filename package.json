@@ -66,6 +66,7 @@
     ]
   },
   "devDependencies": {
+    "@types/async": "^3.2.24",
     "@types/jquery": "^3.5.29",
     "@types/node-fetch": "^2.6.11",
     "@types/react-router-dom": "^5.3.3",

@@ -1,61 +1,21 @@
-import { Stack, Flex, useToast } from "@chakra-ui/react";
+import { Stack, Flex } from "@chakra-ui/react";
 import TwitterSidebar from "../component/Sidebar";
 import Post from "../component/Post";
-import { useState, useEffect } from "react";
-import { PostData, fetchAndProcessPosts } from "../utils/fetchposts";
+import { useState } from "react";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { fetchUsers, UserData } from "../utils/fetchUsers";
-
+import {
+  PostData,
+  UserData,
+} from "../utils/fetchData";
 interface Props {
   username: string;
   peraWallet: PeraWalletConnect;
-  accountAddress: string | null;
+  accountAddress: string;
+  userData: UserData[] | undefined;
+  postsData: PostData[] | undefined;
 }
 
-export const Home = ({ username, peraWallet, accountAddress }: Props) => {
-  const [postData, setPostData] = useState<PostData[]>([]);
-  const [userData, setUserData] = useState<UserData[]>();
-  const toast = useToast();
-  const handlePosts = async () => {
-    try {
-      await fetchAndProcessPosts(setPostData, username, false);
-    } catch (err) {
-      console.log(err);
-      toast({
-        title: "Error",
-        description: "An error occurred while fetching and processing posts.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await handlePosts();
-    };
-
-    const fetchUserData = async () => {
-      const result = await fetchUsers();
-      if (typeof result === "string") {
-        setUserData([]);
-        toast({
-          title: "Error",
-          description: result,
-          status: "error",
-          duration: 9000,
-          isClosable: true,
-        });
-      } else {
-        setUserData(result);
-      }
-    };
-
-    fetchUserData();
-    fetchData();
-  }, [fetchAndProcessPosts, setPostData, username, fetchUsers, setUserData]);
-
+export const Home = ({ username, peraWallet, accountAddress, userData, postsData }: Props) => {
   return (
     <Flex
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
@@ -79,7 +39,7 @@ export const Home = ({ username, peraWallet, accountAddress }: Props) => {
             username={username}
             accountAddress={accountAddress}
             peraWallet={peraWallet}
-            postData={postData}
+            postData={postsData}
             userData={userData}
             width="90%"
           />
