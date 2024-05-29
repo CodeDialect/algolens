@@ -23,7 +23,7 @@ export const Home = ({
 
   useEffect(() => {
     const handleResize = () => {
-      setIsSidebarVisible(window.innerWidth > 700);
+      setIsSidebarVisible(window.innerWidth > 768);
     };
 
     window.addEventListener("resize", handleResize);
