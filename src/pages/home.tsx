@@ -37,7 +37,7 @@ export const Home = ({
     <Flex
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
-      {isSidebarVisible && <TwitterSidebar userData={userData} />}
+      {window.innerWidth > 700 && <TwitterSidebar userData={userData} />}
       <TweetModal
         userProfile={
           userData && userData[0].profilePicture
