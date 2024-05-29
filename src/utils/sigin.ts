@@ -108,7 +108,6 @@ export const signin = async (
       }
 
       if (op === "login") {
-        console.log(user.userData[0]);
         setUser("username", user.userData[0].username ?? "");
         return "logged in successfully";
       }

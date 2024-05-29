@@ -1,6 +1,5 @@
 import {
   algodClient,
-  indexerClient,
   numGlobalBytes,
   numGlobalInts,
   numLocalBytes,
@@ -8,11 +7,10 @@ import {
   postNote,
   userNote,
 } from "./constants";
-import { utf8ToBase64String, base64ToUTF8String } from "./conversion";
 import algosdk from "algosdk";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { fetchAppUser, fetchUserData } from "./fetchData";
+import { fetchAppUser } from "./fetchData";
 
 export const post = async (
   senderAddress: any,
@@ -62,8 +60,6 @@ export const post = async (
       return "User not found";
     }
 
-    // const user = await fetchUserData(userAppId);
-
     if (user.userData === undefined || user.userData === null) {
       return "User not found or Deleted";
     }
@@ -73,9 +69,13 @@ export const post = async (
     }
 
     const loginCheckOp = new TextEncoder().encode("check_post");
-
-    const args = [loginCheckOp, new TextEncoder().encode(user.userData[0].username)];
-
+    const args = [
+      loginCheckOp,
+      new TextEncoder().encode(user.userData[0].username),
+    ];
+    const userId = new TextEncoder().encode(user.appId.toString());
+    const post = new TextEncoder().encode(postContent);
+    const appPostArgs = [post, userId];
     const loginTnx = algosdk.makeApplicationCallTxnFromObject({
       from: senderAddress,
       suggestedParams: params,
@@ -84,116 +84,72 @@ export const post = async (
       onComplete: algosdk.OnApplicationComplete.NoOpOC,
     });
 
-    const signTransaction: SignerTransaction[] = [
-      {
-        txn: loginTnx,
-        signers: [senderAddress],
-      },
-    ];
-    console.log(signTransaction);
-    console.log(args);
+    let txn = algosdk.makeApplicationCreateTxnFromObject({
+      from: senderAddress,
+      suggestedParams: params,
+      onComplete: algosdk.OnApplicationComplete.NoOpOC,
+      approvalProgram: compiledApprovalProgram,
+      clearProgram: compiledClearProgram,
+      numLocalInts: numLocalInts,
+      numLocalByteSlices: numLocalBytes,
+      numGlobalInts: numGlobalInts,
+      numGlobalByteSlices: numGlobalBytes,
+      note: postNote,
+      appArgs: appPostArgs,
+    });
 
-    try {
-      const signedTxn = await perawallet.signTransaction([signTransaction]);
-      console.log(signedTxn);
-      await algodClient
-        .sendRawTransaction(signedTxn[0])
-        .do()
-        .then(async () => {
-          const userId = new TextEncoder().encode(user.appId.toString());
-          const post = new TextEncoder().encode(postContent);
-          let appPostArgs = [post, userId];
-          let txn = algosdk.makeApplicationCreateTxnFromObject({
+    algosdk.assignGroupID([loginTnx, txn]);
+
+    const multipleTxnGroups: SignerTransaction[] = [
+      { txn: loginTnx, signers: [senderAddress] },
+      { txn: txn, signers: [senderAddress] },
+    ];
+
+    let signedTxn = await perawallet.signTransaction([multipleTxnGroups]);
+    let tx = await algodClient.sendRawTransaction(signedTxn).do();
+    let confirmedTxn = await algosdk
+      .waitForConfirmation(algodClient, tx.txId.toString(), 4)
+      .catch(async (err) => {
+        try {
+          let transactionResponse = await algodClient
+            .pendingTransactionInformation(tx.txId.toString())
+            .do();
+          if (transactionResponse?.["application-index"] === undefined) {
+            return err;
+          }
+          const postAppId = transactionResponse["application-index"];
+          let deletePost = algosdk.makeApplicationDeleteTxnFromObject({
             from: senderAddress,
             suggestedParams: params,
-            onComplete: algosdk.OnApplicationComplete.NoOpOC,
-            approvalProgram: compiledApprovalProgram,
-            clearProgram: compiledClearProgram,
-            numLocalInts: numLocalInts,
-            numLocalByteSlices: numLocalBytes,
-            numGlobalInts: numGlobalInts,
-            numGlobalByteSlices: numGlobalBytes,
-            note: postNote,
-            appArgs: appPostArgs,
+            appIndex: postAppId,
           });
 
           const singleTransaction: SignerTransaction[] = [
             {
-              txn: txn,
+              txn: deletePost,
               signers: [senderAddress],
             },
           ];
 
-          let txId = txn.txID().toString();
-
-          try {
-            const signedTxn = await perawallet.signTransaction([
-              singleTransaction,
-            ]);
-            console.log(signedTxn);
-            await algodClient.sendRawTransaction(signedTxn[0]).do();
-          } catch (error) {
-            console.log("Couldn't sign Opt-in txns", error);
-          }
+          let txId = deletePost.txID().toString();
+          const signedTxn = await perawallet.signTransaction([
+            singleTransaction,
+          ]);
+          await algodClient.sendRawTransaction(signedTxn[0]).do();
           console.log("Signed transaction with txID: %s", txId);
-
-          // Wait for transaction to be confirmed
-          let confirmedTxn = await algosdk.waitForConfirmation(
-            algodClient,
-            txId,
-            4
-          );
-
-          // Get the completed Transaction
-          console.log(
-            "Transaction " +
-              txId +
-              " confirmed in round " +
-              confirmedTxn["confirmed-round"]
-          );
-
-          // Get created application id and notify about completion
-          let transactionResponse = await algodClient
-            .pendingTransactionInformation(txId)
-            .do()
-            .catch(async (err) => {
-              try {
-                if (transactionResponse?.["application-index"] === undefined) {
-                  return err;
-                }
-
-                const postAppId = transactionResponse["application-index"];
-                let deletePost = algosdk.makeApplicationDeleteTxnFromObject({
-                  from: senderAddress,
-                  suggestedParams: params,
-                  appIndex: postAppId,
-                });
-
-                const singleTransaction: SignerTransaction[] = [
-                  {
-                    txn: deletePost,
-                    signers: [senderAddress],
-                  },
-                ];
-
-                let txId = deletePost.txID().toString();
-                const signedTxn = await perawallet.signTransaction([
-                  singleTransaction,
-                ]);
-                await algodClient.sendRawTransaction(signedTxn[0]).do();
-                console.log("Signed transaction with txID: %s", txId);
-                return "Post deleted";
-              } catch (err) {
-                return err;
-              }
-            });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } catch (error) {
-      console.log(error);
-    }
+          return transactionResponse;
+        } catch (err) {
+          throw err;
+        }
+      });
+    // Get the completed Transaction
+    console.log(
+      "Transaction " +
+        tx.txId.toString() +
+        " confirmed in round " +
+        confirmedTxn["confirmed-round"]
+    );
+    return "Post Successful";
   } catch (error) {
     console.log(error);
   }

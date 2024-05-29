@@ -5,18 +5,14 @@ import ProfilePage from "./pages/profile";
 import { useEffect, useState } from "react";
 import Nav from "./component/Navbar";
 import { PeraWalletConnect } from "@perawallet/connect";
-// import { fetchData } from "./database/fetch";
-import { Test } from "./pages/test";
-import Login from "./pages/login";
 import { postNote, userNote } from "./utils/constants";
 import {
   fetchAppUser,
   fetchUserPosts,
   PostData,
-  updatePostBy,
   UserData,
 } from "./utils/fetchData";
-import { Spinner } from "@chakra-ui/react";
+import { Box, Flex, Spinner } from "@chakra-ui/react";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("");
@@ -101,8 +97,6 @@ const App = () => {
     fetchUserData();
   }, [accountAddress, setUserData]);
 
-  console.log(quotaError);
-
   return (
     <Nav
       username={getUsername("username")}
@@ -114,7 +108,16 @@ const App = () => {
     >
       <Router>
         {isLoading ? (
-          <Spinner />
+          <Flex justifyContent="center" alignItems="center" height="100vh">
+            <Box width="100px" height="100px">
+              <Spinner
+                thickness="50px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="purple.500"
+              />
+            </Box>
+          </Flex>
         ) : (
           <Switch>
             <Route
@@ -130,50 +133,53 @@ const App = () => {
                 />
               )}
             />
-            {/* <Route
-            exact
-            path="/"
-            render={() =>
-              accountAddress && getUsername("username") === "" ? (
-                <LoginPage
-                  peraWallet={peraWallet}
-                  accountAddress={accountAddress}
-                />
-              ) : (
-                <div>
-                  {quotaError ? (
-                    <div style={{  padding: "16px" }}>
-                      <h2>Error: {quotaError}</h2>
-                    </div>
-                  ) : (
-                    <Home
-                      accountAddress={accountAddress}
-                      peraWallet={peraWallet}
-                      username={getUsername("username")}
-                    />
-                  )}
-                </div>
-              )
-            }
-          />
-          <Route
-            path="/profile"
-            render={() =>
-              accountAddress && getUsername("username") !== "" ? (
-                <ProfilePage
-                  username={getUsername("username")}
-                  accountAddress={accountAddress}
-                  peraWallet={peraWallet}
-                />
-              ) : (
-                <LoginPage
-                  peraWallet={peraWallet}
-                  accountAddress={accountAddress}
-                />
-              )
-            }
-          /> */}
-            <Route path="/test" render={() => <Test />} />
+            <Route
+              exact
+              path="/"
+              render={() =>
+                accountAddress && getUsername("username") === "" ? (
+                  <LoginPage
+                    peraWallet={peraWallet}
+                    accountAddress={accountAddress}
+                  />
+                ) : (
+                  <div>
+                    {quotaError ? (
+                      <div style={{ padding: "16px" }}>
+                        <h2>Error: {quotaError}</h2>
+                      </div>
+                    ) : (
+                      <Home
+                        accountAddress={accountAddress}
+                        peraWallet={peraWallet}
+                        username={getUsername("username")}
+                        userData={userData}
+                        postsData={postData}
+                      />
+                    )}
+                  </div>
+                )
+              }
+            />
+            <Route
+              path="/profile"
+              render={() =>
+                accountAddress && getUsername("username") !== "" ? (
+                  <ProfilePage
+                    username={getUsername("username")}
+                    accountAddress={accountAddress}
+                    peraWallet={peraWallet}
+                    userData={userData}
+                    postData={postData}
+                  />
+                ) : (
+                  <LoginPage
+                    peraWallet={peraWallet}
+                    accountAddress={accountAddress}
+                  />
+                )
+              }
+            />
           </Switch>
         )}
       </Router>

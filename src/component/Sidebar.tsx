@@ -1,8 +1,8 @@
-import { Box, Flex, Text, Link, Icon, Avatar } from "@chakra-ui/react";
+import { Box, Flex, Text, Link, Icon, Avatar, Tooltip } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { FiHome, FiHash, FiBell, FiMail } from "react-icons/fi";
 import styled from "styled-components";
-import { UserData, fetchUsers } from "../utils/fetchUsers";
+import { UserData } from "../utils/fetchData";
 
 const StyledSidebar = styled(Box)`
   background: linear-gradient(195deg, rgb(213 196 196), rgb(88 26 232));
@@ -15,58 +15,58 @@ const StyledSidebar = styled(Box)`
 `;
 
 interface SidebarProps {
-  accountAddress: string | null;
-  username: string;
+  userData: UserData[] | undefined;
 }
 
-
-const TwitterSidebar = ({ accountAddress, username }: SidebarProps) => {
-  const [userData, setUserData] = useState<UserData[]>();
-  
-  // useEffect(() => {
-  //   const fetchUserData = async () => {
-  //     const result = await fetchUsers();
-  //     if (typeof result === "string") {
-  //       setUserData([]);
-  //     } else {
-  //       setUserData(result);
-  //     }
-  //   };
-
-  //   fetchUserData();
-  // });
-
-  const user =
-    userData &&
-    userData.find(
-      (user) => user.owner === accountAddress && user.username === username
-    );
-  const profilePicture = user && user.profilePicture ? user.profilePicture : "";
-
+const TwitterSidebar = ({ userData }: SidebarProps) => {
   return (
     <StyledSidebar>
-      <Flex direction="column" alignItems="flex-start" width="100%" textAlign={"center"}>
-        <Link display="flex" alignItems="center" mb="2">
-          <Icon as={FiHome} />
-          <Text ml="2">Home</Text>
-        </Link>
-        <Link display="flex" alignItems="center" mb="2">
-          <Icon as={FiHash} />
-          <Text ml="2">Explore</Text>
-        </Link>
-        <Link display="flex" alignItems="center" mb="2">
-          <Icon as={FiBell} />
-          <Text ml="2">Notifications</Text>
-        </Link>
-        <Link display="flex" alignItems="center" mb="2">
-          <Icon as={FiMail} />
-          <Text ml="2">Messages</Text>
-        </Link>
+      <Flex
+        direction="column"
+        alignItems="flex-start"
+        width="100%"
+        textAlign={"center"}
+      >
+        <Tooltip label="Home">
+          <Link display="flex" href="/" alignItems="center" mb="2">
+            <Icon as={FiHome} />
+            <Text ml="2">Home</Text>
+          </Link>
+        </Tooltip>
+        <Tooltip label="Coming Soon">
+          <Link cursor={"not-allowed"} display="flex" alignItems="center" mb="2">
+            <Icon as={FiHash} />
+            <Text ml="2">Explore</Text>
+          </Link>
+        </Tooltip>
+        <Tooltip label="Coming Soon">
+          <Link display="flex" cursor={"not-allowed"} alignItems="center" mb="2">
+            <Icon as={FiBell} />
+            <Text ml="2">Notifications</Text>
+          </Link>
+        </Tooltip>
+        <Tooltip label="Coming Soon">
+          <Link display="flex" cursor={"not-allowed"} alignItems="center" mb="2">
+            <Icon as={FiMail} />
+            <Text ml="2">Messages</Text>
+          </Link>
+        </Tooltip>
       </Flex>
       <Flex justifyContent="center" mt="auto" mb="8">
-        <Link href="/profile" display="flex" alignItems="center" style={{ textDecoration: "none" }}>
-          <Avatar size="md" name="User" src={profilePicture}/>
-        </Link>
+        <Tooltip label="Profile">
+          <Link
+            href="/profile"
+            display="flex"
+            alignItems="center"
+            style={{ textDecoration: "none" }}
+          >
+            <Avatar
+              size="md"
+              _hover={{ cursor: "pointer" }}
+              src={userData && userData[0].profilePicture}
+            />
+          </Link>
+        </Tooltip>
       </Flex>
     </StyledSidebar>
   );

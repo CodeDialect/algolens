@@ -6,6 +6,7 @@ import {
   useColorModeValue,
   Flex,
   useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import Post from "../component/Post";
 import TweetModal from "../component/Inputmodal";
@@ -13,44 +14,29 @@ import { PeraWalletConnect } from "@perawallet/connect";
 import { useEffect, useState } from "react";
 // import { fetchData } from "../database/fetch";
 import { indexerClient } from "../utils/constants";
-import { fetchAndProcessPosts, PostData } from "../utils/fetchposts";
-import { fetchUsers, UserData } from "../utils/fetchUsers";
 import { updateProfile } from "../utils/updateProfile";
+import { PostData, UserData } from "../utils/fetchData";
 
 interface ProfileProps {
   username: string;
   accountAddress: string | null;
   peraWallet: PeraWalletConnect;
+  postData: PostData[] | undefined;
+  userData: UserData[] | undefined;
 }
 
 const ProfilePage = ({
   username,
   accountAddress,
   peraWallet,
+  postData,
+  userData,
 }: ProfileProps) => {
-  const [postData, setPostData] = useState<PostData[]>([]);
-  const [userData, setUserData] = useState<UserData[]>();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const toast = useToast();
 
-  const handlePosts = async () => {
-    try {
-      await fetchAndProcessPosts(setPostData, username, true);
-    } catch (err) {
-      console.log(err);
-      toast({
-        title: "Error",
-        description: "An error occurred while fetching and processing posts.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-    appId: number
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const clientID = "37be49d89f76ade";
     const fileInput = event.target;
@@ -61,7 +47,7 @@ const ProfilePage = ({
       const formData = new FormData();
       formData.append("image", file);
       formData.append("type", "file");
-      formData.append("title", `${appId}`);
+      formData.append("title", userData![0].username!);
       try {
         const response = await fetch("https://api.imgur.com/3/image", {
           method: "POST",
@@ -76,14 +62,12 @@ const ProfilePage = ({
         }
 
         const data = await response.json();
-        console.log(data);
         const uploadedImageURL = data.data.link;
         const updateResponse = await updateProfile(
           username,
           accountAddress,
           peraWallet,
           uploadedImageURL,
-          appId
         );
         if (updateResponse.success) {
           toast({
@@ -124,7 +108,6 @@ const ProfilePage = ({
           }
         }
         setSelectedImage(null);
-        console.log(uploadedImageURL);
       } catch (error) {
         console.error(error);
       }
@@ -133,49 +116,12 @@ const ProfilePage = ({
     }
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     await handlePosts();
-  //   };
-  //   const fetchUserData = async () => {
-  //     const result = await fetchUsers();
-  //     if (typeof result === "string") {
-  //       setUserData([]);
-  //       toast({
-  //         title: "Error",
-  //         description: result,
-  //         status: "error",
-  //         duration: 9000,
-  //         isClosable: true,
-  //       })
-  //     } else {
-  //       setUserData(result);
-  //     }
-  //   };
-
-  //   fetchData();
-  //   fetchUserData();
-  // }, [
-  //   fetchData,
-  //   indexerClient,
-  //   setPostData,
-  //   fetchUsers,
-  //   setUserData,
-  //   username,
-  // ]);
-
-  const user = (userData ?? []).filter(
-    (data) =>
-      data.username === username.toLowerCase() && data.owner === accountAddress
-  );
-
   return (
     <Flex
       h={"100vh"}
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
       <TweetModal
-        username={username}
         senderAddress={accountAddress}
         peraWallet={peraWallet}
       />
@@ -197,9 +143,9 @@ const ProfilePage = ({
           padding={4}
         >
           <Flex flex={1} bg="blue.200" position="relative">
-            {user && user[0] && user[0].profilePicture && (
+            {userData && userData.length > 0 && userData[0]?.profilePicture && (
               <img
-                src={user[0].profilePicture}
+                src={userData[0].profilePicture}
                 alt="Selected Image"
                 style={{
                   cursor: "pointer",
@@ -224,7 +170,7 @@ const ProfilePage = ({
             <input
               type="file"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleFileChange(e, user[0].appId)
+                handleFileChange(e)
               }
               style={{
                 display: selectedImage ? "none" : "block",
@@ -246,46 +192,17 @@ const ProfilePage = ({
             p={1}
             pt={2}
           >
-            <Heading fontSize={"2xl"} fontFamily={"body"}>
-              {username.charAt(0).toUpperCase() +
-                username.slice(1).toLowerCase()}
-            </Heading>
-            <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
-              {`@${username}`}
-            </Text>
-            <Text
-              textAlign={"center"}
-              color={useColorModeValue("gray.700", "gray.400")}
-              px={3}
-            >
-              Actress, musician, songwriter and artist.
-            </Text>
-            <Stack align={"center"} justify={"center"} direction={"row"} mt={6}>
-              <Badge
-                px={2}
-                py={1}
-                bg={useColorModeValue("gray.50", "gray.800")}
-                fontWeight={"400"}
-              >
-                #art
-              </Badge>
-              <Badge
-                px={2}
-                py={1}
-                bg={useColorModeValue("gray.50", "gray.800")}
-                fontWeight={"400"}
-              >
-                #photography
-              </Badge>
-              <Badge
-                px={2}
-                py={1}
-                bg={useColorModeValue("gray.50", "gray.800")}
-                fontWeight={"400"}
-              >
-                #music
-              </Badge>
-            </Stack>
+            {userData && userData[0].username && userData.length > 0 && (
+              <Heading fontSize={"2xl"} fontFamily={"body"}>
+                {userData[0].username.charAt(0).toUpperCase() +
+                  userData[0].username.slice(1).toLowerCase()}
+              </Heading>
+            )}
+            {userData && userData.length > 0 && (
+              <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
+                {`@${userData[0].username}`}
+              </Text>
+            )}
           </Stack>
         </Stack>
         <Stack
@@ -304,13 +221,10 @@ const ProfilePage = ({
               scrollbarWidth: "none",
             }}
           >
-            {/* <Post
-              username={username}
-              accountAddress={accountAddress}
-              peraWallet={peraWallet}
+            <Post
               postData={postData}
               userData={userData}
-            /> */}
+            />
           </div>
         </Stack>
       </Flex>

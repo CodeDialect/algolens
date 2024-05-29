@@ -45,7 +45,6 @@ export const createUser = async (
     username: string | undefined;
   }
 ) => {
-  console.log("Adding product...");
 
   let params = await algodClient.getTransactionParams().do();
   params.fee = algosdk.ALGORAND_MIN_TX_FEE;
@@ -62,7 +61,7 @@ export const createUser = async (
   let appUserArgs = [signup, userName];
 
   const user = await fetchAppUser(senderAddress, userNote);
-  console.log(user);
+  
   if (user) {
     return "A Username already exists! with this address";
   }
@@ -92,7 +91,6 @@ export const createUser = async (
 
   try {
     const signedTxn = await perawallet.signTransaction([singleTransaction]);
-    console.log(signedTxn);
     await algodClient
       .sendRawTransaction(signedTxn[0])
       .do()
@@ -139,7 +137,6 @@ export const createUser = async (
     suggestedParams: params,
   });
 
-  console.log(paymentTxn);
 
   algosdk.assignGroupID([appCallTxn, paymentTxn]);
 
@@ -149,8 +146,6 @@ export const createUser = async (
   ];
 
   let signedTxn = await perawallet.signTransaction([multipleTxnGroups]);
-  console.log("Signed group transaction");
-  console.log(signedTxn);
 
   let tx = await algodClient
     .sendRawTransaction(signedTxn)
@@ -172,8 +167,6 @@ export const createUser = async (
       let signedDelAppTxn = await perawallet.signTransaction([
         singleTransaction,
       ]);
-
-      console.log(signedDelAppTxn);
 
       let delAppTx = await algodClient
         .sendRawTransaction(signedDelAppTxn[0])

@@ -1,4 +1,4 @@
-import { indexerClient, postNote } from "./constants";
+import { indexerClient, postNote, userNote } from "./constants";
 import { base64ToUTF8String, utf8ToBase64String } from "./conversion";
 
 export interface UserData {
@@ -37,7 +37,6 @@ export const fetchAppUser = async (
     .txType("appl")
     .limit(1)
     .do();
-  console.log("reponse fetchAppUser:", reponse);
   const appId: number = reponse["transactions"][0]["created-application-index"];
   const userData = await fetchUserData(appId);
   return { userData, appId };
@@ -57,7 +56,6 @@ export const fetchUserData = async (appId: number) => {
 
   const globalState = await response.application.params["global-state"];
   if (globalState === undefined) return null;
-  console.log("globalState fetchUserData:", globalState);
   userData.push({
     username: base64ToUTF8String(getField("USERNAME", globalState).value.bytes),
     owner: response.application.params.creator,
@@ -83,7 +81,6 @@ export const fetchUserPosts = async (
       console.log(error);
       return { transactions: [] };
     });
-  console.log("response fetchPostsAppIds:", response);
 
   if (response["transactions"].length === 0) {
     return "No posts found";
@@ -93,12 +90,7 @@ export const fetchUserPosts = async (
     (transaction: { [x: string]: any }) =>
       transaction["created-application-index"]
   );
-  console.log(
-    "applicationTransactions fetchPostsAppIds:",
-    applicationTransactions
-  );
   const postsData = await fetchPostsData(applicationTransactions);
-  console.log("postsData fetchPostsData:", postsData);
   return { postsData, applicationTransactions };
 };
 
@@ -142,4 +134,13 @@ export const updatePostBy = async (
   const globalState = params.application.params["global-state"];
   const username = base64ToUTF8String(getField("USERNAME", globalState).value.bytes);
   return username;
+}
+
+
+export async function fetchData() {
+  const response = await indexerClient
+    .searchForTransactions()
+    .notePrefix(userNote).minRound(40395259)
+    .do();
+    return response
 }

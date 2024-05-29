@@ -12,62 +12,112 @@ import {
   Flex,
   ModalFooter,
   Image,
+  useToast,
+  Box,
 } from "@chakra-ui/react";
 import { post } from "../utils/post";
 import { PeraWalletConnect } from "@perawallet/connect";
 
 interface TweetModalProps {
-  username: string;
   senderAddress: string | null;
   peraWallet: PeraWalletConnect;
 }
 
-const TweetModal = ({
-  username,
-  senderAddress,
-  peraWallet,
-}: TweetModalProps) => {
+const TweetModal = ({ senderAddress, peraWallet }: TweetModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [tweet, setTweet] = useState("");
+  const [tweetLength, setTweetLength] = useState(0);
+  const toast = useToast();
 
   const handleOpenModal = () => {
-    console.log("openModal");
     setIsOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsOpen(false);
     setTweet("");
+    setTweetLength(0);
   };
 
   const handleTweetChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTweet(event.target.value);
+    setTweetLength(event.target.value.length);
   };
 
   const handleTweetSubmit = async () => {
-    await post(senderAddress, peraWallet, tweet);
-    console.log("Tweet submitted:", tweet);
-    handleCloseModal();
+    setIsLoading(true);
+
+    if (tweet.trim() === "") {
+      toast({
+        title: "Error",
+        description: "Please enter a tweet.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (tweet.length > 123) {
+      toast({
+        title: "Error",
+        description:
+          "Tweet is too long. Please enter a tweet with no more than 123 characters.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await post(senderAddress, peraWallet, tweet);
+      handleCloseModal();
+      toast({
+        title: "Error",
+        description: response,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while posting the tweet.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    }
   };
 
   return (
     <>
       <Button
+        zIndex={1}
         position="fixed"
         bottom={4}
         right={4}
-        borderRadius="full" // Make the button circular
+        borderRadius="full"
         colorScheme="teal"
         size="lg"
         boxShadow="lg"
-        width={20} // Set the width and height to the same value to make the button circular
+        width={20}
         height={20}
         _hover={{
           transform: "scale(1.05)",
           transition: "transform 0.3s ease-in-out",
         }}
-        color={"white"}
-        backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
+        color="white"
+        backgroundImage="linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"
         onClick={() => handleOpenModal()}
       >
         <Image src="icon.svg" filter="invert(100%)" />
@@ -81,28 +131,60 @@ const TweetModal = ({
 
           <ModalBody>
             <Flex alignItems="center">
-              <Avatar
-                size="md"
-                name="John Doe"
-              />
+              <Avatar size="md" name="John Doe" />
               <Textarea
                 value={tweet}
                 onChange={handleTweetChange}
                 placeholder="What's happening?"
+                size="lg"
+                p={4}
+                _placeholder={{
+                  color: "gray.500",
+                }}
+                minH="100px"
                 resize="none"
-                border="none"
                 fontSize="lg"
-                height="10rem"
-                ml={3}
+                color="black"
+                maxLength={123}
               />
             </Flex>
+
+            <Box mt={4} alignItems="flex-end">
+              <Box as="span" fontSize="sm" color="gray.500" mr={2}>
+                {tweetLength}/123
+              </Box>
+            </Box>
           </ModalBody>
 
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleTweetSubmit}>
-              Tweet
+          <ModalFooter alignItems={"end"}>
+            <Button
+              isLoading={isLoading}
+              colorScheme="teal"
+              onClick={handleTweetSubmit}
+              fontSize="sm"
+              mt={4}
+              // isDisabled={tweet.length > 123}
+              _hover={{
+                transform: "scale(1.05)",
+                transition: "transform 0.3s ease-in-out",
+              }}
+            >
+              {isLoading ? "Posting..." : "Post"}
             </Button>
-            <Button onClick={handleCloseModal}>Cancel</Button>
+            <Button
+              ml={3}
+              color={"white"}
+              backgroundColor={"red.500"}
+              onClick={handleCloseModal}
+              fontSize="sm"
+              mt={4}
+              _hover={{
+                transform: "scale(1.05)",
+                transition: "transform 0.3s ease-in-out",
+              }}
+            >
+              Cancel
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

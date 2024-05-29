@@ -1,4 +1,4 @@
-import { StarIcon, LinkIcon } from "@chakra-ui/icons";
+import { LinkIcon } from "@chakra-ui/icons";
 import {
   Box,
   Card,
@@ -10,23 +10,20 @@ import {
   CardBody,
   CardFooter,
   Button,
+  Spinner,
 } from "@chakra-ui/react";
-import { PeraWalletConnect } from "@perawallet/connect";
 import { useEffect, useState } from "react";
-// import { Like } from "../utils/like";
 import { PostData, updatePostBy, UserData } from "../utils/fetchData";
 
 interface PostProps {
   postData: PostData[] | undefined;
   width?: string;
-  username: string;
-  accountAddress: string | null;
-  peraWallet: PeraWalletConnect;
-  userData?: UserData[] | undefined;
+  userData: UserData[] | undefined;
 }
 
 const Post: React.FC<PostProps> = ({ postData, width, userData }) => {
   const [resultData, setResultData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchPostData = async () => {
       if (postData) {
@@ -35,34 +32,33 @@ const Post: React.FC<PostProps> = ({ postData, width, userData }) => {
           const result = await updatePostBy(Number(post.postBy));
           resultArray.push(result);
         }
-        setResultData(resultArray); 
+        setResultData(resultArray);
       }
+      setLoading(false);
     };
 
     fetchPostData();
   }, [postData, updatePostBy]);
   // const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
 
-  // const handleLike = async (
-  //   index: number,
-  //   username: string,
-  //   accountAddress: string | null,
-  //   peraWallet: PeraWalletConnect,
-  //   postBy: string | undefined
-  // ) => {
-  //   await Like(username, accountAddress, peraWallet, postBy);
-
-  //   setLikedPosts((prevLikedPosts) => ({
-  //     ...prevLikedPosts,
-  //     [index]: !prevLikedPosts[index],
-  //   }));
-  // };
-
+  if (loading)
+    return (
+      <Flex justifyContent="center" alignItems="center" height="100vh">
+        <Box width="100px" height="100px">
+          <Spinner
+            thickness="50px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="purple.500"
+          />
+        </Box>
+      </Flex>
+    );
   return (
     <>
       {postData &&
         postData.map((post, index) => {
-          const result:string = resultData[index];
+          const result: string = resultData[index];
           return (
             <Card
               background={"linear-gradient(45deg, rgb(167 143 221), #6b46fe)"}
@@ -87,7 +83,7 @@ const Post: React.FC<PostProps> = ({ postData, width, userData }) => {
                     ></Avatar>
                     <Box data-type="Box">
                       <Heading data-type="Heading" size="sm">
-                      {result ? result : post.postBy}
+                        {result}
                       </Heading>
                       <Text data-type="Text">
                         {post.timestamp.toLocaleString()}
