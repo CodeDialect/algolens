@@ -66,6 +66,7 @@ const App = () => {
       if (accountAddress) {
         setIsLoading(true);
         const posts = await fetchUserPosts(accountAddress, postNote);
+        console.log(posts);
         if (typeof posts === "string") {
           return posts;
         }
@@ -75,11 +76,13 @@ const App = () => {
             owner: post.owner,
             postBy: post.postBy,
             timestamp: new Date(Number(post.timestamp) * 1000),
+            id: post.id,
           }))
         );
         setIsLoading(false);
       }
     }
+    console.log(postData);
     fetchPostData();
   }, [accountAddress, setPostData]);
 
@@ -97,7 +100,18 @@ const App = () => {
     fetchUserData();
   }, [accountAddress, setUserData]);
 
-  return (
+  return isLoading ? (
+    <Flex justifyContent="center" alignItems="center" height="100vh">
+      <Box width="100px" height="100px">
+        <Spinner
+          thickness="50px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="purple.500"
+        />
+      </Box>
+    </Flex>
+  ) : (
     <Nav
       username={getUsername("username")}
       accountAddress={accountAddress}
@@ -107,23 +121,12 @@ const App = () => {
       handleDisconnectWalletClick={handleDisconnectWalletClick}
     >
       <Router>
-        {isLoading ? (
-          <Flex justifyContent="center" alignItems="center" height="100vh">
-            <Box width="100px" height="100px">
-              <Spinner
-                thickness="50px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="purple.500"
-              />
-            </Box>
-          </Flex>
-        ) : (
-          <Switch>
-            <Route
-              exact
-              path="/"
-              render={() => (
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() =>
+              accountAddress && getUsername("username") === "" ? (
                 <Home
                   postsData={postData}
                   userData={userData}
@@ -131,57 +134,34 @@ const App = () => {
                   peraWallet={peraWallet}
                   accountAddress={accountAddress}
                 />
-              )}
-            />
-            <Route
-              exact
-              path="/"
-              render={() =>
-                accountAddress && getUsername("username") === "" ? (
-                  <LoginPage
-                    peraWallet={peraWallet}
-                    accountAddress={accountAddress}
-                  />
-                ) : (
-                  <div>
-                    {quotaError ? (
-                      <div style={{ padding: "16px" }}>
-                        <h2>Error: {quotaError}</h2>
-                      </div>
-                    ) : (
-                      <Home
-                        accountAddress={accountAddress}
-                        peraWallet={peraWallet}
-                        username={getUsername("username")}
-                        userData={userData}
-                        postsData={postData}
-                      />
-                    )}
-                  </div>
-                )
-              }
-            />
-            <Route
-              path="/profile"
-              render={() =>
-                accountAddress && getUsername("username") !== "" ? (
-                  <ProfilePage
-                    username={getUsername("username")}
-                    accountAddress={accountAddress}
-                    peraWallet={peraWallet}
-                    userData={userData}
-                    postData={postData}
-                  />
-                ) : (
-                  <LoginPage
-                    peraWallet={peraWallet}
-                    accountAddress={accountAddress}
-                  />
-                )
-              }
-            />
-          </Switch>
-        )}
+              ) : (
+                <LoginPage
+                  peraWallet={peraWallet}
+                  accountAddress={accountAddress}
+                />
+              )
+            }
+          />
+          <Route
+            path="/profile"
+            render={() =>
+              accountAddress && getUsername("username") !== "" ? (
+                <ProfilePage
+                  username={getUsername("username")}
+                  accountAddress={accountAddress}
+                  peraWallet={peraWallet}
+                  userData={userData}
+                  postData={postData}
+                />
+              ) : (
+                <LoginPage
+                  peraWallet={peraWallet}
+                  accountAddress={accountAddress}
+                />
+              )
+            }
+          />
+        </Switch>
       </Router>
     </Nav>
   );

@@ -21,9 +21,10 @@ import { PeraWalletConnect } from "@perawallet/connect";
 interface TweetModalProps {
   senderAddress: string | null;
   peraWallet: PeraWalletConnect;
+  userProfile: string;
 }
 
-const TweetModal = ({ senderAddress, peraWallet }: TweetModalProps) => {
+const TweetModal = ({ senderAddress, peraWallet, userProfile }: TweetModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [tweet, setTweet] = useState("");
@@ -131,7 +132,7 @@ const TweetModal = ({ senderAddress, peraWallet }: TweetModalProps) => {
 
           <ModalBody>
             <Flex alignItems="center">
-              <Avatar size="md" name="John Doe" />
+              <Avatar mr={2} size="md" src={userProfile} />
               <Textarea
                 value={tweet}
                 onChange={handleTweetChange}
@@ -149,7 +150,7 @@ const TweetModal = ({ senderAddress, peraWallet }: TweetModalProps) => {
               />
             </Flex>
 
-            <Box mt={4} alignItems="flex-end">
+            <Box mt={4} display={"flex"} justifyContent="flex-end">
               <Box as="span" fontSize="sm" color="gray.500" mr={2}>
                 {tweetLength}/123
               </Box>

@@ -4,7 +4,7 @@ import Post from "../component/Post";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { PostData, UserData } from "../utils/fetchData";
 import TweetModal from "../component/Inputmodal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 interface Props {
   username: string;
   peraWallet: PeraWalletConnect;
@@ -19,12 +19,34 @@ export const Home = ({
   userData,
   postsData,
 }: Props) => {
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSidebarVisible(window.innerWidth > 700);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  });
+
   return (
     <Flex
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
-      <TwitterSidebar userData={userData} />
-      <TweetModal senderAddress={accountAddress} peraWallet={peraWallet} />
+      {isSidebarVisible && <TwitterSidebar userData={userData} />}
+      <TweetModal
+        userProfile={
+          userData && userData[0].profilePicture
+            ? userData[0].profilePicture
+            : ""
+        }
+        senderAddress={accountAddress}
+        peraWallet={peraWallet}
+      />
       <Stack
         m={"0 0 0 0"}
         overflowY="auto"
@@ -39,7 +61,7 @@ export const Home = ({
             msOverflowStyle: "none",
           }}
         >
-          <Post postData={postsData} userData={userData} width="90%" />
+          <Post accountAddress={accountAddress} peraWallet={peraWallet} postData={postsData} userData={userData} width="90%" />
         </div>
       </Stack>
     </Flex>

@@ -15,13 +15,16 @@ import {
   Image,
   Link,
   useToast,
+  Tooltip,
+  Spinner,
 } from "@chakra-ui/react";
 import { signin } from "../utils/sigin";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { useEffect, useState } from "react";
 import { UserData } from "../utils/fetchData";
-import { postNote, userNote } from "../utils/constants";
-import { post } from "../utils/post";
+import { ChevronRightIcon, CloseIcon, DeleteIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { deleteEntity } from "../utils/deleteEntity";
+import { useState } from "react";
+import DeleteConfirmation from "./Deletemodal";
 
 interface NavProps {
   children: React.ReactNode;
@@ -40,9 +43,70 @@ export default function Nav({
   handleDisconnectWalletClick,
   peraWallet,
   username,
-  userData
+  userData,
 }: NavProps) {
   const toast = useToast();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
+    useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
+
+  const handleDelete = (userId: number) => {
+    if(userId === null || userId === undefined) return
+    setIsDeleteConfirmationOpen(true);
+    setUserId(userId);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteConfirmationOpen(false);
+  };
+
+  const handleDeleteConfirmation = () => {
+    console.log(userId);
+    handleDeleteUser(userId);
+    setIsDeleteConfirmationOpen(false);
+  };
+
+  const handleDeleteUser = async (userId: number | null) => {
+    console.log(userId);
+    try {
+      setIsDeleting(true);
+      const result = await deleteEntity(accountAddress, userId, peraWallet);
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: result.message,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+      setUserId(null);
+      localStorage.removeItem("username");
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    }
+  };
+
   const handleLogout = async () => {
     if (username !== "" && accountAddress) {
       const result = await signin(
@@ -64,6 +128,20 @@ export default function Nav({
     }, 500);
   };
 
+  if(isDeleting) {
+    return (
+      <Flex justifyContent="center" alignItems="center" height="100vh">
+        <Box width="100px" height="100px">
+          <Spinner
+            thickness="50px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="purple.500"
+          />
+        </Box>
+      </Flex>
+    );
+  }
 
   return (
     <>
@@ -78,7 +156,9 @@ export default function Nav({
             justifyContent={"center"}
             alignItems={"center"}
           >
-            <Image maxW={"60%"} src="logotop.png" alt="logo" />
+            <Tooltip label="Home">
+              <Image maxW={"60%"} src="logotop.png" alt="logo" />
+            </Tooltip>
           </Stack>
           <Flex alignItems={"center"}>
             <Stack direction={"row"} spacing={7}>
@@ -121,11 +201,7 @@ export default function Nav({
                   >
                     <Avatar
                       size={"sm"}
-                      src={
-                        userData
-                          ? userData[0].profilePicture
-                          : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDmELpn2iH-dqdj8jeC4RJ471P3VbIwr2C0OO1KntBPA&s"
-                      }
+                      src={userData ? userData[0].profilePicture : ""}
                     />
                   </MenuButton>
                   <MenuList alignItems={"center"}>
@@ -145,13 +221,40 @@ export default function Nav({
                     </Center>
                     <br />
                     <MenuDivider />
-                    <MenuItem onClick={() => handleLogout()}>Logout</MenuItem>
-                    <MenuItem onClick={() => handleDisconnectWalletClick()}>
+                    {window.innerWidth < 700 && (
+                      <>
+                        <MenuItem icon={<HamburgerIcon />}>
+                          <Link href="/profile">Profile</Link>
+                        </MenuItem>
+                        <MenuDivider />
+                      </>
+                    )}
+                    <MenuItem
+                      icon={<ChevronRightIcon />}
+                      onClick={() => handleLogout()}
+                    >
+                      Logout
+                    </MenuItem>
+                    <MenuItem
+                      icon={<CloseIcon />}
+                      onClick={() => handleDisconnectWalletClick()}
+                    >
                       Disconnect Wallet
+                    </MenuItem>
+                    <MenuItem
+                      icon={<DeleteIcon />}
+                      onClick={() => handleDelete(userData?.[0]?.id || -1)}
+                    >
+                      Delete Account
                     </MenuItem>
                   </MenuList>
                 </Menu>
               )}
+              <DeleteConfirmation
+                isOpen={isDeleteConfirmationOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={() => handleDeleteConfirmation()}
+              />
             </Stack>
           </Flex>
         </Flex>

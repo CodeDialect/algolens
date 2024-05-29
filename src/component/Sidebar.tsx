@@ -1,5 +1,4 @@
 import { Box, Flex, Text, Link, Icon, Avatar, Tooltip } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
 import { FiHome, FiHash, FiBell, FiMail } from "react-icons/fi";
 import styled from "styled-components";
 import { UserData } from "../utils/fetchData";

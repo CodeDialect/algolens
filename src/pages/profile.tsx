@@ -67,7 +67,7 @@ const ProfilePage = ({
           username,
           accountAddress,
           peraWallet,
-          uploadedImageURL,
+          uploadedImageURL
         );
         if (updateResponse.success) {
           toast({
@@ -100,16 +100,23 @@ const ProfilePage = ({
               duration: 9000,
               isClosable: true,
             });
-            setTimeout(() => {
-              window.location.reload();
-            }, 500);
           } catch (error) {
-            console.error(error);
+            toast({
+              title: "Error",
+              description: "Something went wrong",
+              status: "error",
+              duration: 9000,
+              isClosable: true,
+            });
           }
         }
-        setSelectedImage(null);
       } catch (error) {
         console.error(error);
+      } finally {
+        setSelectedImage(null);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }
     } else {
       console.log("No file selected");
@@ -122,6 +129,11 @@ const ProfilePage = ({
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
       <TweetModal
+        userProfile={
+          userData && userData[0].profilePicture
+            ? userData[0].profilePicture
+            : ""
+        }
         senderAddress={accountAddress}
         peraWallet={peraWallet}
       />
@@ -221,10 +233,7 @@ const ProfilePage = ({
               scrollbarWidth: "none",
             }}
           >
-            <Post
-              postData={postData}
-              userData={userData}
-            />
+            <Post accountAddress={accountAddress} peraWallet={peraWallet} postData={postData} userData={userData} />
           </div>
         </Stack>
       </Flex>

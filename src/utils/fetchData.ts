@@ -2,6 +2,7 @@ import { indexerClient, postNote, userNote } from "./constants";
 import { base64ToUTF8String, utf8ToBase64String } from "./conversion";
 
 export interface UserData {
+  id: number;
   username: string | undefined;
   owner: string;
   loginStatus: number;
@@ -9,6 +10,7 @@ export interface UserData {
 }
 
 export interface PostData {
+  id: number;
   post: string;
   owner: string;
   postBy: string;
@@ -63,6 +65,7 @@ export const fetchUserData = async (appId: number) => {
       getField("PICTURE", globalState).value.bytes
     ),
     loginStatus: getField("LOGINSTATUS", globalState).value.uint,
+    id: response.application.id,
   });
   return userData;
 };
@@ -119,6 +122,7 @@ export const fetchPostsData = async (appIds: number[]) => {
       owner: response.application.params.creator,
       postBy: base64ToUTF8String(getField("POSTBY", globalState).value.bytes),
       timestamp: getField("TIME", globalState).value.uint,
+      id: response.application.id,
     });
   }
   return posts;

@@ -1,4 +1,4 @@
-import { LinkIcon } from "@chakra-ui/icons";
+import { DeleteIcon, LinkIcon } from "@chakra-ui/icons";
 import {
   Box,
   Card,
@@ -11,19 +11,98 @@ import {
   CardFooter,
   Button,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { PostData, updatePostBy, UserData } from "../utils/fetchData";
+import { deleteEntity } from "../utils/deleteEntity";
+import { PeraWalletConnect } from "@perawallet/connect";
+import DeleteConfirmation from "./Deletemodal";
+import { base64ToUTF8String } from "../utils/conversion";
 
 interface PostProps {
   postData: PostData[] | undefined;
   width?: string;
   userData: UserData[] | undefined;
+  peraWallet: PeraWalletConnect;
+  accountAddress: string | null;
 }
 
-const Post: React.FC<PostProps> = ({ postData, width, userData }) => {
+const Post: React.FC<PostProps> = ({
+  postData,
+  width,
+  userData,
+  peraWallet,
+  accountAddress,
+}) => {
   const [resultData, setResultData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [hoveredPostIndex, setHoveredPostIndex] = useState<number | null>(null);
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
+    useState(false);
+  const [postId, setPostId] = useState<number | null>(null);
+
+  const toast = useToast();
+  const handleMouseEnter = (index: number) => {
+    setHoveredPostIndex(index);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredPostIndex(null);
+  };
+
+  const handleDelete = (postid: number) => {
+    setIsDeleteConfirmationOpen(true);
+    setPostId(postid);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteConfirmationOpen(false);
+  };
+
+  const handleDeleteConfirmation = () => {
+    handleDeletePost(postId);
+    setIsDeleteConfirmationOpen(false);
+  };
+
+  const handleDeletePost = async (postId: number | null) => {
+    try {
+      setIsDeleting(true);
+      const result = await deleteEntity(accountAddress, postId, peraWallet);
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: result.message,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+      setPostId(null);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    }
+  };
   useEffect(() => {
     const fetchPostData = async () => {
       if (postData) {
@@ -41,7 +120,7 @@ const Post: React.FC<PostProps> = ({ postData, width, userData }) => {
   }, [postData, updatePostBy]);
   // const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
 
-  if (loading)
+  if (loading || isDeleting)
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
@@ -67,29 +146,50 @@ const Post: React.FC<PostProps> = ({ postData, width, userData }) => {
               data-type="Card"
               w={width ? width : "80vw"}
               height="fit-content"
+              position="relative"
+              onMouseEnter={() => handleMouseEnter(index)}
+              onMouseLeave={handleMouseLeave}
             >
-              <CardHeader data-type="CardHeader">
-                <Flex data-type="Flex">
-                  <Flex
-                    data-type="Flex"
-                    flex="1"
-                    gap="4"
-                    alignItems="center"
-                    flexWrap="wrap"
+              <Flex justify="flex-end" position="relative">
+                <DeleteConfirmation
+                  isOpen={isDeleteConfirmationOpen}
+                  onClose={handleDeleteCancel}
+                  onConfirm={() => handleDeleteConfirmation()}
+                />
+                {hoveredPostIndex === index && (
+                  <Button
+                    backgroundColor={"transparent"}
+                    data-type="DeleteButton"
+                    onClick={() => handleDelete(post.id)} // Replace with your delete logic
+                    position="absolute"
+                    top="0"
+                    right="0"
+                    _hover={{ backgroundColor: "transparent" }}
                   >
-                    <Avatar
-                      src={userData && userData[0].profilePicture}
-                      data-type="Avatar"
-                    ></Avatar>
-                    <Box data-type="Box">
-                      <Heading data-type="Heading" size="sm">
-                        {result}
-                      </Heading>
-                      <Text data-type="Text">
-                        {post.timestamp.toLocaleString()}
-                      </Text>
-                    </Box>
-                  </Flex>
+                    <DeleteIcon color={"red"} />
+                  </Button>
+                )}
+              </Flex>
+              <CardHeader data-type="CardHeader">
+                <Flex
+                  data-type="Flex"
+                  flex="1"
+                  gap="4"
+                  alignItems="center"
+                  flexWrap="wrap"
+                >
+                  <Avatar
+                    src={userData && userData[0].profilePicture}
+                    data-type="Avatar"
+                  ></Avatar>
+                  <Box data-type="Box">
+                    <Heading data-type="Heading" size="sm">
+                      {result}
+                    </Heading>
+                    <Text data-type="Text">
+                      {post.timestamp.toLocaleString()}
+                    </Text>
+                  </Box>
                 </Flex>
               </CardHeader>
               <CardBody data-type="CardBody">
