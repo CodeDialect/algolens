@@ -21,10 +21,16 @@ import {
 import { signin } from "../utils/sigin";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { UserData } from "../utils/fetchData";
-import { ChevronRightIcon, CloseIcon, DeleteIcon, HamburgerIcon } from "@chakra-ui/icons";
+import {
+  ChevronRightIcon,
+  CloseIcon,
+  DeleteIcon,
+  HamburgerIcon,
+} from "@chakra-ui/icons";
 import { deleteEntity } from "../utils/deleteEntity";
 import { useState } from "react";
 import DeleteConfirmation from "./Deletemodal";
+import RotatingSvgComponent from "./loading";
 
 interface NavProps {
   accountAddress: string;
@@ -50,7 +56,7 @@ export default function Nav({
   const [userId, setUserId] = useState<number | null>(null);
 
   const handleDelete = (userId: number) => {
-    if(userId === null || userId === undefined) return
+    if (userId === null || userId === undefined) return;
     setIsDeleteConfirmationOpen(true);
     setUserId(userId);
   };
@@ -126,16 +132,11 @@ export default function Nav({
     }, 500);
   };
 
-  if(isDeleting) {
+  if (isDeleting) {
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
-          <Spinner
-            thickness="50px"
-            speed="0.65s"
-            emptyColor="gray.200"
-            color="purple.500"
-          />
+          <RotatingSvgComponent />
         </Box>
       </Flex>
     );
@@ -174,7 +175,9 @@ export default function Nav({
                 >
                   Connect to Pera Wallet
                 </Button>
-              ) : userData !== undefined && userData.length > 0 ? (
+              ) : userData !== undefined &&
+                userData.length > 0 &&
+                userData[0].loginStatus === 1 ? (
                 <Menu>
                   <MenuButton
                     as={Button}
@@ -233,8 +236,8 @@ export default function Nav({
                     </MenuItem>
                   </MenuList>
                 </Menu>
-              ) : 
-                (<Button
+              ) : (
+                <Button
                   _hover={{
                     transform: "scale(1.05)",
                     transition: "transform 0.3s ease-in-out",
@@ -247,7 +250,6 @@ export default function Nav({
                 >
                   Disconnect
                 </Button>
-                
               )}
               <DeleteConfirmation
                 isOpen={isDeleteConfirmationOpen}

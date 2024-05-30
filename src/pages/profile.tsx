@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { indexerClient } from "../utils/constants";
 import { updateProfile } from "../utils/updateProfile";
 import { PostData, UserData } from "../utils/fetchData";
+import RotatingSvgComponent from "../component/loading";
 
 interface ProfileProps {
   username: string;
@@ -34,7 +35,6 @@ const ProfilePage = ({
 }: ProfileProps) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const toast = useToast();
-  console.log("accountAddress:", accountAddress);
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -236,15 +236,13 @@ const ProfilePage = ({
               scrollbarWidth: "none",
             }}
           >
-            {filterPost && filterPost.length > 0 ? (
+            {filterPost && filterPost.length > 0 && (
               <Post
                 accountAddress={accountAddress}
                 peraWallet={peraWallet}
                 postData={filterPost}
                 userData={userData}
               />
-            ) : (
-              <div>No posts found</div>
             )}
           </div>
         </Stack>

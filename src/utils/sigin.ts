@@ -32,7 +32,6 @@ export const signin = async (
 
   try {
     const user = await fetchAppUser(senderAddress, userNote);
-    console.log(user);
     if(user === null) {
       return "User not found";
     }
@@ -97,7 +96,7 @@ export const signin = async (
       }
       console.log("Signed transaction with txID: %s", txId);
     } catch (error) {
-      console.log("Couldn't sign Opt-in txns", error);
+      console.log("Rejected by User or Something went wrong", error);
     }
   } catch (err) {
     console.log(err);

@@ -13,6 +13,8 @@ import {
   UserData,
 } from "./utils/fetchData";
 import { Box, Flex, Spinner } from "@chakra-ui/react";
+import { base64ToUTF8String } from "./utils/conversion";
+import RotatingSvgComponent from "./component/loading";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("");
@@ -29,6 +31,10 @@ const App = () => {
     const username = localStorage.getItem(key);
     return username !== null ? username : "";
   };
+
+  useEffect(() => {
+    document.title = "Algolens";
+  }, []);
 
   useEffect(() => {
     peraWallet.reconnectSession().then((accounts) => {
@@ -102,37 +108,37 @@ const App = () => {
       }
     }
     fetchUserData();
-    console.log(userData)
   }, [accountAddress, setUserData]);
 
   return isLoading ? (
     <Flex justifyContent="center" alignItems="center" height="100vh">
       <Box width="100px" height="100px">
-        <Spinner
-          thickness="50px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="purple.500"
+        <RotatingSvgComponent
+
         />
       </Box>
     </Flex>
   ) : (
     <>
-    <Nav
-      username={getUsername("username")}
-      accountAddress={accountAddress}
-      peraWallet={peraWallet}
-      userData={userData}
-      handleConnectWalletClick={handleConnectWalletClick}
-      handleDisconnectWalletClick={handleDisconnectWalletClick}
-    />
+      <Nav
+        username={getUsername("username")}
+        accountAddress={accountAddress}
+        peraWallet={peraWallet}
+        userData={userData}
+        handleConnectWalletClick={handleConnectWalletClick}
+        handleDisconnectWalletClick={handleDisconnectWalletClick}
+      />
       <Router>
         <Switch>
           <Route
             exact
             path="/"
             render={() =>
-              accountAddress && getUsername("username") !== "" && userData?.length !== 0 ? (
+              accountAddress &&
+              getUsername("username") !== "" &&
+              userData &&
+              userData?.length !== 0 &&
+              userData[0].loginStatus === 1 ? (
                 <Home
                   postsData={postData}
                   userData={userData}
@@ -151,7 +157,11 @@ const App = () => {
           <Route
             path="/profile"
             render={() =>
-              accountAddress && getUsername("username") !== "" && userData?.length !== 0 ? (
+              accountAddress &&
+              getUsername("username") !== "" &&
+              userData &&
+              userData?.length !== 0 &&
+              userData[0].loginStatus === 1 ? (
                 <ProfilePage
                   username={getUsername("username")}
                   accountAddress={accountAddress}
@@ -169,7 +179,7 @@ const App = () => {
           />
         </Switch>
       </Router>
-      </>
+    </>
   );
 };
 

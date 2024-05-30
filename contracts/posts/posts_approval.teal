@@ -14,6 +14,14 @@ global CreatorAddress
 ==
 return
 main_l4:
+txn Note
+byte "post-algolens"
+==
+assert
+txn NumAppArgs
+int 3
+==
+assert
 byte "POST"
 txna ApplicationArgs 0
 app_global_put

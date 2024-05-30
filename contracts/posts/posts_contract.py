@@ -13,6 +13,8 @@ class Posts:
         owner = Txn.sender()
         
         update_state = Seq([
+            Assert(Txn.note() == Bytes("post-algolens")),
+            Assert(Txn.application_args.length() == Int(3)),
             App.globalPut(self.Variables.post, post),
             App.globalPut(self.Variables.time, Global.latest_timestamp()),
             App.globalPut(self.Variables.post_by, postedby),

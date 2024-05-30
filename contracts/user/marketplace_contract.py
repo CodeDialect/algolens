@@ -28,10 +28,9 @@ class SocialMedia:
     def signup(self):
         username = Txn.application_args[1]
         valid_number_of_transactions = Global.group_size() == Int(2)
-
         valid_payment_to_seller = And(
             Gtxn[1].type_enum() == TxnType.Payment,
-            Gtxn[1].amount() == App.globalGet(self.GlobalVariables.price),
+            Gtxn[1].amount() == Btoi(App.globalGet(self.GlobalVariables.price)),
             Gtxn[1].sender() == Gtxn[0].sender()
         )
     

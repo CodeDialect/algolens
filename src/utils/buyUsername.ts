@@ -44,7 +44,6 @@ export const createUser = async (
     username: string | undefined;
   }
 ) => {
-
   let params = await algodClient.getTransactionParams().do();
   params.fee = algosdk.ALGORAND_MIN_TX_FEE;
   params.flatFee = true;
@@ -56,11 +55,13 @@ export const createUser = async (
   // Build note to identify transaction later and required app args as Uint8Arrays
   const userName = new TextEncoder().encode(User.username);
   const signup = new TextEncoder().encode("signup");
-  const price = algosdk.encodeUint64(1)
+  const price = algosdk.encodeUint64(100000);
   let appUserArgs = [signup, userName];
 
+  console.log(new TextDecoder().decode(new Uint8Array(price)));
+  // console.log(new TextDecoder().decode(price));
   const user = await fetchAppUser(senderAddress, userNote);
-  
+
   if (user?.userData !== null) {
     console.log(user);
     return "A Username already exists! with this address";
@@ -132,10 +133,9 @@ export const createUser = async (
   let paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: senderAddress,
     to: "XUQSPD6WYBX5I672T2L2YERGPXAMQCUQ6FQGHZ4ZZ7VTQF6M5TWJBQYQKY",
-    amount: 1000000,
+    amount: 100000,
     suggestedParams: params,
   });
-
 
   algosdk.assignGroupID([appCallTxn, paymentTxn]);
 
