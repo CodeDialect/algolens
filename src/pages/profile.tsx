@@ -34,7 +34,7 @@ const ProfilePage = ({
 }: ProfileProps) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const toast = useToast();
-
+  console.log("accountAddress:", accountAddress);
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -122,6 +122,9 @@ const ProfilePage = ({
       console.log("No file selected");
     }
   };
+
+  const filteredPosts = postData?.filter((post) => post.owner === accountAddress);
+  const filterPost = filteredPosts?.length ? filteredPosts : undefined;
 
   return (
     <Flex
@@ -233,7 +236,16 @@ const ProfilePage = ({
               scrollbarWidth: "none",
             }}
           >
-            <Post accountAddress={accountAddress} peraWallet={peraWallet} postData={postData} userData={userData} />
+            {filterPost && filterPost.length > 0 ? (
+              <Post
+                accountAddress={accountAddress}
+                peraWallet={peraWallet}
+                postData={filterPost}
+                userData={userData}
+              />
+            ) : (
+              <div>No posts found</div>
+            )}
           </div>
         </Stack>
       </Flex>

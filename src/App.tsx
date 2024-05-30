@@ -65,24 +65,28 @@ const App = () => {
     async function fetchPostData() {
       if (accountAddress) {
         setIsLoading(true);
-        const posts = await fetchUserPosts(accountAddress, postNote);
-        console.log(posts);
+        const posts = await fetchUserPosts(postNote);
         if (typeof posts === "string") {
           return posts;
         }
-        setPostData(
-          posts.postsData.map((post) => ({
-            post: post.post,
-            owner: post.owner,
-            postBy: post.postBy,
-            timestamp: new Date(Number(post.timestamp) * 1000),
-            id: post.id,
-          }))
-        );
+        if (posts && posts.postsData) {
+          setPostData(
+            posts.postsData.map((post) => ({
+              post: post.post,
+              owner: post.owner,
+              postBy: post.postBy,
+              timestamp: new Date(Number(post.timestamp) * 1000),
+              id: post.id,
+            }))
+          );
+        } else {
+          // Handle the case when posts is null or undefined
+          // You can set postData to an empty array or display an error message
+          setPostData([]);
+        }
         setIsLoading(false);
       }
     }
-    console.log(postData);
     fetchPostData();
   }, [accountAddress, setPostData]);
 
@@ -127,15 +131,15 @@ const App = () => {
             path="/"
             render={() =>
               accountAddress && getUsername("username") === "" ? (
-                <Home
-                  postsData={postData}
-                  userData={userData}
-                  username={getUsername("username")}
+                <LoginPage
                   peraWallet={peraWallet}
                   accountAddress={accountAddress}
                 />
               ) : (
-                <LoginPage
+                <Home
+                  postsData={postData}
+                  userData={userData}
+                  username={getUsername("username")}
                   peraWallet={peraWallet}
                   accountAddress={accountAddress}
                 />

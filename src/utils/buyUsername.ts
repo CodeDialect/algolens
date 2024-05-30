@@ -10,7 +10,6 @@ import {
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { fetchAppUser } from "./fetchData";
-// import { appIdDB } from "../database/add";
 
 global.Buffer = global.Buffer || require("buffer").Buffer;
 
@@ -62,7 +61,8 @@ export const createUser = async (
 
   const user = await fetchAppUser(senderAddress, userNote);
   
-  if (user) {
+  if (user?.userData !== null) {
+    console.log(user);
     return "A Username already exists! with this address";
   }
 

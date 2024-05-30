@@ -32,14 +32,15 @@ export const fetchAppUser = async (
   senderAddress: string,
   notePrefix: Uint8Array,
 ) => {
-  const reponse = await indexerClient
+  const response = await indexerClient
     .searchForTransactions()
     .notePrefix(notePrefix)
     .address(senderAddress)
     .txType("appl")
     .limit(1)
     .do();
-  const appId: number = reponse["transactions"][0]["created-application-index"];
+  if(response["transactions"].length === 0) return null
+  const appId: number = response["transactions"][0]["created-application-index"];
   const userData = await fetchUserData(appId);
   return { userData, appId };
 };
@@ -71,13 +72,11 @@ export const fetchUserData = async (appId: number) => {
 };
 
 export const fetchUserPosts = async (
-  senderAddress: string,
   notePrefix: Uint8Array
 ) => {
   const response = await indexerClient
-    .searchForTransactions()
+    .searchForTransactions().minRound(40395259)
     .notePrefix(notePrefix)
-    .address(senderAddress)
     .txType("appl")
     .do()
     .catch((error) => {
@@ -111,6 +110,7 @@ export const fetchPostsData = async (appIds: number[]) => {
   );
 
   for (const response of responses) {
+    if(response === null) return null
     if (response.application.deleted === true) {
       continue;
     }
@@ -136,6 +136,7 @@ export const updatePostBy = async (
     .includeAll(true)
     .do();
   const globalState = params.application.params["global-state"];
+  if (globalState === undefined) return null;
   const username = base64ToUTF8String(getField("USERNAME", globalState).value.bytes);
   return username;
 }

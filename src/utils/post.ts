@@ -56,6 +56,8 @@ export const post = async (
     }
     const user = await fetchAppUser(senderAddress, userNote);
 
+    if(user === null) return "User not found";
+    
     if (user.appId === undefined) {
       return "User not found";
     }

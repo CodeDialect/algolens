@@ -15,10 +15,9 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { PostData, updatePostBy, UserData } from "../utils/fetchData";
-import { deleteEntity } from "../utils/deleteEntity";
+import { deletePost } from "../utils/deletePost";
 import { PeraWalletConnect } from "@perawallet/connect";
 import DeleteConfirmation from "./Deletemodal";
-import { base64ToUTF8String } from "../utils/conversion";
 
 interface PostProps {
   postData: PostData[] | undefined;
@@ -69,7 +68,7 @@ const Post: React.FC<PostProps> = ({
   const handleDeletePost = async (postId: number | null) => {
     try {
       setIsDeleting(true);
-      const result = await deleteEntity(accountAddress, postId, peraWallet);
+      const result = await deletePost(accountAddress, postId, peraWallet);
       if (result.success) {
         toast({
           title: "Success",
@@ -156,19 +155,20 @@ const Post: React.FC<PostProps> = ({
                   onClose={handleDeleteCancel}
                   onConfirm={() => handleDeleteConfirmation()}
                 />
-                {hoveredPostIndex === index && (
-                  <Button
-                    backgroundColor={"transparent"}
-                    data-type="DeleteButton"
-                    onClick={() => handleDelete(post.id)} // Replace with your delete logic
-                    position="absolute"
-                    top="0"
-                    right="0"
-                    _hover={{ backgroundColor: "transparent" }}
-                  >
-                    <DeleteIcon color={"red"} />
-                  </Button>
-                )}
+                {hoveredPostIndex === index &&
+                  post.owner === accountAddress && (
+                    <Button
+                      backgroundColor={"transparent"}
+                      data-type="DeleteButton"
+                      onClick={() => handleDelete(post.id)} // Replace with your delete logic
+                      position="absolute"
+                      top="0"
+                      right="0"
+                      _hover={{ backgroundColor: "transparent" }}
+                    >
+                      <DeleteIcon color={"red"} />
+                    </Button>
+                  )}
               </Flex>
               <CardHeader data-type="CardHeader">
                 <Flex

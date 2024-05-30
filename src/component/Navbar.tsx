@@ -72,7 +72,7 @@ export default function Nav({
     try {
       setIsDeleting(true);
       const result = await deleteEntity(accountAddress, userId, peraWallet);
-      if (result.success) {
+      if (result?.success) {
         toast({
           title: "Success",
           description: result.message,
@@ -83,7 +83,7 @@ export default function Nav({
       } else {
         toast({
           title: "Error",
-          description: result.error,
+          description: result?.message,
           status: "error",
           duration: 9000,
           isClosable: true,
@@ -100,10 +100,10 @@ export default function Nav({
     } finally {
       setIsDeleting(false);
       setUserId(null);
-      localStorage.removeItem("username");
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // localStorage.removeItem("username");
+      // setTimeout(() => {
+      //   window.location.reload();
+      // }, 500);
     }
   };
 

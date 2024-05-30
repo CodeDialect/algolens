@@ -35,6 +35,8 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   const toast = useToast();
   const handleSignupClick = () => {
     setIsSignup(!isSignup);
+    setUsername("");
+    setIsUsernameAvailable(true);
   };
 
   const handleSignup = async (username: string) => {

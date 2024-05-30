@@ -23,6 +23,13 @@ export const updateProfile = async (
 
     const user = await fetchAppUser(accountAddress, userNote);
 
+    if (user === null) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+    
     if (user.appId === undefined || user.appId === null) {
       return {
         success: false,

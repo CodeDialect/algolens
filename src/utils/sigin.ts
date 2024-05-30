@@ -32,39 +32,23 @@ export const signin = async (
 
   try {
     const user = await fetchAppUser(senderAddress, userNote);
-
+    console.log(user);
+    if(user === null) {
+      return "User not found";
+    }
+    
     if (user.appId === undefined) {
       return "User not found";
     }
     
     if (user.userData === null) {
-      return "User not found";
+      return "User is not registered with connected wallet";
     }
 
     if (user.userData[0].loginStatus === 1 && op === "login") {
       return "User already logged in";
     }
 
-
-    // if (userData.length !== 0 && typeof userData !== "string") {
-    //   const filteredAppId = userData.filter(
-    //     (data) =>
-    //       data.username === username.toLowerCase() &&
-    //       data.owner === senderAddress
-    //   );
-
-    //   if (filteredAppId.length === 0) {
-    //     return null;
-    //   }
-
-    //   const userAppId = filteredAppId[0].appId;
-
-    //   if (
-    //     userData.some(
-    //       (data) => data.username?.toLowerCase() === username.toLowerCase()
-    //     ) &&
-    //     userData.some((data) => data.owner === senderAddress)
-    //   ) {
     let appArgs = [operation, new TextEncoder().encode(user.userData[0].username)];
     try {
       const signTxn = algosdk.makeApplicationCallTxnFromObject({
