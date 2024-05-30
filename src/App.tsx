@@ -130,7 +130,7 @@ const App = () => {
             exact
             path="/"
             render={() =>
-              accountAddress && getUsername("username") === "" ? (
+              !accountAddress && getUsername("username") === "" ? (
                 <LoginPage
                   peraWallet={peraWallet}
                   accountAddress={accountAddress}
