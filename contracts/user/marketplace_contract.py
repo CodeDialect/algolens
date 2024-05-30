@@ -17,21 +17,21 @@ class SocialMedia:
         
     def application_creation(self):
         return Seq([
+            Assert(Txn.note() == Bytes("user-algolens")),
+            Assert(Txn.application_args.length() == Int(2)),
             App.globalPut(self.GlobalVariables.username, Txn.application_args[0]),
             App.globalPut(self.GlobalVariables.owner, Txn.sender()),
-            App.globalPut(self.GlobalVariables.price, Int(1)),
+            App.globalPut(self.GlobalVariables.price, Txn.application_args[1]),
             Approve()
         ])
 
     def signup(self):
         username = Txn.application_args[1]
-        price = Int(1)  # Set a fixed price for username signup
-        
         valid_number_of_transactions = Global.group_size() == Int(2)
 
         valid_payment_to_seller = And(
             Gtxn[1].type_enum() == TxnType.Payment,
-            Gtxn[1].amount() == price,
+            Gtxn[1].amount() == App.globalGet(self.GlobalVariables.price),
             Gtxn[1].sender() == Gtxn[0].sender()
         )
     

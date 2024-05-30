@@ -1,6 +1,7 @@
 import { fetchData, fetchUserData } from "./fetchData";
 
-export const checkUser = async (username: string) => {
+
+export const checkUser = async (username: string): Promise<string> => {
   if (username.trim() === "") {
     return "Username cannot be empty";
   }
@@ -8,6 +9,14 @@ export const checkUser = async (username: string) => {
   if (username.length < 3) {
     return "Username must be at least 3 characters";
   }
+
+  const usernameRegex = /^[a-zA-Z0-9]+$/;
+  if (!usernameRegex.test(username)) {
+    return "Username can only contain alphanumeric characters";
+  }
+
+  // Introduce a delay of 1 second (1000 milliseconds)
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   const transactionArray = await fetchData();
   if (transactionArray["transactions"].length === 0) {
@@ -27,4 +36,5 @@ export const checkUser = async (username: string) => {
     }
     return "Username is available";
   }
+  return "Something went wrong";
 };

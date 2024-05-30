@@ -27,7 +27,6 @@ import { useState } from "react";
 import DeleteConfirmation from "./Deletemodal";
 
 interface NavProps {
-  children: React.ReactNode;
   accountAddress: string;
   username: string;
   handleConnectWalletClick: () => void;
@@ -37,7 +36,6 @@ interface NavProps {
 }
 
 export default function Nav({
-  children,
   accountAddress,
   handleConnectWalletClick,
   handleDisconnectWalletClick,
@@ -100,10 +98,10 @@ export default function Nav({
     } finally {
       setIsDeleting(false);
       setUserId(null);
-      // localStorage.removeItem("username");
-      // setTimeout(() => {
-      //   window.location.reload();
-      // }, 500);
+      localStorage.removeItem("username");
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
   };
 
@@ -176,21 +174,7 @@ export default function Nav({
                 >
                   Connect to Pera Wallet
                 </Button>
-              ) : username === "" ? (
-                <Button
-                  _hover={{
-                    transform: "scale(1.05)",
-                    transition: "transform 0.3s ease-in-out",
-                  }}
-                  color={"white"}
-                  backgroundImage={
-                    "linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"
-                  }
-                  onClick={() => handleDisconnectWalletClick()}
-                >
-                  Disconnect
-                </Button>
-              ) : (
+              ) : userData !== undefined && userData.length > 0 ? (
                 <Menu>
                   <MenuButton
                     as={Button}
@@ -249,6 +233,21 @@ export default function Nav({
                     </MenuItem>
                   </MenuList>
                 </Menu>
+              ) : 
+                (<Button
+                  _hover={{
+                    transform: "scale(1.05)",
+                    transition: "transform 0.3s ease-in-out",
+                  }}
+                  color={"white"}
+                  backgroundImage={
+                    "linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"
+                  }
+                  onClick={() => handleDisconnectWalletClick()}
+                >
+                  Disconnect
+                </Button>
+                
               )}
               <DeleteConfirmation
                 isOpen={isDeleteConfirmationOpen}
@@ -259,7 +258,6 @@ export default function Nav({
           </Flex>
         </Flex>
       </Box>
-      {children}
     </>
   );
 }

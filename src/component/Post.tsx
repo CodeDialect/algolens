@@ -179,7 +179,11 @@ const Post: React.FC<PostProps> = ({
                   flexWrap="wrap"
                 >
                   <Avatar
-                    src={userData && userData[0].profilePicture}
+                    src={
+                      userData && userData[0] && userData[0].profilePicture
+                        ? userData[0].profilePicture
+                        : ""
+                    }
                     data-type="Avatar"
                   ></Avatar>
                   <Box data-type="Box">

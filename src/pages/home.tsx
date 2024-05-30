@@ -1,4 +1,4 @@
-import { Stack, Flex, Spinner } from "@chakra-ui/react";
+import { Stack, Flex, Spinner, Box } from "@chakra-ui/react";
 import TwitterSidebar from "../component/Sidebar";
 import Post from "../component/Post";
 import { PeraWalletConnect } from "@perawallet/connect";
@@ -19,20 +19,20 @@ export const Home = ({
   userData,
   postsData,
 }: Props) => {
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsSidebarVisible(window.innerWidth > 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  });
-
+  if (userData === undefined ) {
+    return (
+      <Flex justifyContent="center" alignItems="center" height="100vh">
+        <Box width="100px" height="100px">
+          <Spinner
+            thickness="50px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="purple.500"
+          />
+        </Box>
+      </Flex>
+    );
+  }
   return (
     <Flex
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
@@ -40,7 +40,7 @@ export const Home = ({
       {window.innerWidth > 700 && <TwitterSidebar userData={userData} />}
       <TweetModal
         userProfile={
-          userData && userData[0].profilePicture
+          userData && userData[0] && userData[0].profilePicture
             ? userData[0].profilePicture
             : ""
         }
@@ -61,7 +61,13 @@ export const Home = ({
             msOverflowStyle: "none",
           }}
         >
-          <Post accountAddress={accountAddress} peraWallet={peraWallet} postData={postsData} userData={userData} width="90%" />
+          <Post
+            accountAddress={accountAddress}
+            peraWallet={peraWallet}
+            postData={postsData}
+            userData={userData}
+            width="90%"
+          />
         </div>
       </Stack>
     </Flex>

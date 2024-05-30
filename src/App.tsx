@@ -102,6 +102,7 @@ const App = () => {
       }
     }
     fetchUserData();
+    console.log(userData)
   }, [accountAddress, setUserData]);
 
   return isLoading ? (
@@ -116,6 +117,7 @@ const App = () => {
       </Box>
     </Flex>
   ) : (
+    <>
     <Nav
       username={getUsername("username")}
       accountAddress={accountAddress}
@@ -123,23 +125,23 @@ const App = () => {
       userData={userData}
       handleConnectWalletClick={handleConnectWalletClick}
       handleDisconnectWalletClick={handleDisconnectWalletClick}
-    >
+    />
       <Router>
         <Switch>
           <Route
             exact
             path="/"
             render={() =>
-              !accountAddress && getUsername("username") === "" ? (
-                <LoginPage
-                  peraWallet={peraWallet}
-                  accountAddress={accountAddress}
-                />
-              ) : (
+              accountAddress && getUsername("username") !== "" && userData?.length !== 0 ? (
                 <Home
                   postsData={postData}
                   userData={userData}
                   username={getUsername("username")}
+                  peraWallet={peraWallet}
+                  accountAddress={accountAddress}
+                />
+              ) : (
+                <LoginPage
                   peraWallet={peraWallet}
                   accountAddress={accountAddress}
                 />
@@ -149,7 +151,7 @@ const App = () => {
           <Route
             path="/profile"
             render={() =>
-              accountAddress && getUsername("username") !== "" ? (
+              accountAddress && getUsername("username") !== "" && userData?.length !== 0 ? (
                 <ProfilePage
                   username={getUsername("username")}
                   accountAddress={accountAddress}
@@ -167,7 +169,7 @@ const App = () => {
           />
         </Switch>
       </Router>
-    </Nav>
+      </>
   );
 };
 

@@ -54,9 +54,9 @@ export const createUser = async (
   const compiledClearProgram = await compileProgram(await clearProgram());
 
   // Build note to identify transaction later and required app args as Uint8Arrays
-  let userName = new TextEncoder().encode(User.username);
-  let signup = new TextEncoder().encode("signup");
-
+  const userName = new TextEncoder().encode(User.username);
+  const signup = new TextEncoder().encode("signup");
+  const price = algosdk.encodeUint64(1)
   let appUserArgs = [signup, userName];
 
   const user = await fetchAppUser(senderAddress, userNote);
@@ -77,7 +77,7 @@ export const createUser = async (
     numGlobalInts: numGlobalInts,
     numGlobalByteSlices: numGlobalBytes,
     note: userNote,
-    appArgs: [userName],
+    appArgs: [userName, price],
   });
 
   const singleTransaction: SignerTransaction[] = [
@@ -119,7 +119,6 @@ export const createUser = async (
     .do();
 
   let appId = transactionResponse["application-index"];
-  let price = transactionResponse["global-state-delta"][1]["value"].uint;
 
   // Create ApplicationCallTxn
   let appCallTxn = algosdk.makeApplicationCallTxnFromObject({
@@ -133,7 +132,7 @@ export const createUser = async (
   let paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: senderAddress,
     to: "XUQSPD6WYBX5I672T2L2YERGPXAMQCUQ6FQGHZ4ZZ7VTQF6M5TWJBQYQKY",
-    amount: price,
+    amount: 1000000,
     suggestedParams: params,
   });
 

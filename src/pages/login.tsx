@@ -54,6 +54,16 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       });
       return;
     }
+    if(username.length > 20) {
+      toast({
+        title: "Error",
+        description: "Username must be less than 20 characters",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return;
+    }
 
     if (!accountAddress) {
       toast({
@@ -196,7 +206,8 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       const response = await checkUser(e.currentTarget.value);
       if (response === "Username is available") {
         setIsUsernameAvailable(true);
-      } else {
+      }
+      else{
         setIsUsernameAvailable(false);
       }
       setIsLoading(false);
@@ -244,6 +255,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
               value={username.toLowerCase()}
               onChange={(e) => setUsername(e.target.value)}
               onKeyUp={handleUsernameKeyUp}
+              maxLength={20}
             />
             {isLoading && <Spinner mt={2} />}
             {isSignup &&

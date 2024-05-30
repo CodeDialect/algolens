@@ -33,19 +33,34 @@ const TwitterSidebar = ({ userData }: SidebarProps) => {
           </Link>
         </Tooltip>
         <Tooltip label="Coming Soon">
-          <Link cursor={"not-allowed"} display="flex" alignItems="center" mb="2">
+          <Link
+            cursor={"not-allowed"}
+            display="flex"
+            alignItems="center"
+            mb="2"
+          >
             <Icon as={FiHash} />
             <Text ml="2">Explore</Text>
           </Link>
         </Tooltip>
         <Tooltip label="Coming Soon">
-          <Link display="flex" cursor={"not-allowed"} alignItems="center" mb="2">
+          <Link
+            display="flex"
+            cursor={"not-allowed"}
+            alignItems="center"
+            mb="2"
+          >
             <Icon as={FiBell} />
             <Text ml="2">Notifications</Text>
           </Link>
         </Tooltip>
         <Tooltip label="Coming Soon">
-          <Link display="flex" cursor={"not-allowed"} alignItems="center" mb="2">
+          <Link
+            display="flex"
+            cursor={"not-allowed"}
+            alignItems="center"
+            mb="2"
+          >
             <Icon as={FiMail} />
             <Text ml="2">Messages</Text>
           </Link>
@@ -62,7 +77,11 @@ const TwitterSidebar = ({ userData }: SidebarProps) => {
             <Avatar
               size="md"
               _hover={{ cursor: "pointer" }}
-              src={userData && userData[0].profilePicture}
+              src={
+                userData && userData[0] && userData[0].profilePicture
+                  ? userData[0].profilePicture
+                  : ""
+              }
             />
           </Link>
         </Tooltip>

@@ -1,4 +1,4 @@
-import { indexerClient, postNote, userNote } from "./constants";
+import { indexerClient, minRound, postNote, userNote } from "./constants";
 import { base64ToUTF8String, utf8ToBase64String } from "./conversion";
 
 export interface UserData {
@@ -75,7 +75,7 @@ export const fetchUserPosts = async (
   notePrefix: Uint8Array
 ) => {
   const response = await indexerClient
-    .searchForTransactions().minRound(40395259)
+    .searchForTransactions().minRound(minRound)
     .notePrefix(notePrefix)
     .txType("appl")
     .do()
@@ -145,7 +145,7 @@ export const updatePostBy = async (
 export async function fetchData() {
   const response = await indexerClient
     .searchForTransactions()
-    .notePrefix(userNote).minRound(40395259)
+    .notePrefix(userNote).minRound(minRound)
     .do();
     return response
 }
