@@ -18,7 +18,6 @@ import { PostData, updatePostBy, UserData } from "../utils/fetchData";
 import { deletePost } from "../utils/deletePost";
 import { PeraWalletConnect } from "@perawallet/connect";
 import DeleteConfirmation from "./Deletemodal";
-import RotatingSvgComponent from "./loading";
 
 interface PostProps {
   postData: PostData[] | undefined;
@@ -124,10 +123,24 @@ const Post: React.FC<PostProps> = ({
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
-          <RotatingSvgComponent />
+        <Spinner
+            thickness="50px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="purple.500"
+          />
         </Box>
       </Flex>
     );
+
+    console.log(resultData);
+    if(resultData.length === 0){
+      return (
+        <Flex justifyContent="center" alignItems="center" height="100vh">
+          <Text color={"white"}>No posts found</Text>
+        </Flex>
+      );
+    }
   return (
     <>
       {postData &&

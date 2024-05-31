@@ -13,8 +13,6 @@ import {
   UserData,
 } from "./utils/fetchData";
 import { Box, Flex, Spinner } from "@chakra-ui/react";
-import { base64ToUTF8String } from "./utils/conversion";
-import RotatingSvgComponent from "./component/loading";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("");
@@ -113,9 +111,12 @@ const App = () => {
   return isLoading ? (
     <Flex justifyContent="center" alignItems="center" height="100vh">
       <Box width="100px" height="100px">
-        <RotatingSvgComponent
-
-        />
+      <Spinner
+            thickness="50px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="purple.500"
+          />
       </Box>
     </Flex>
   ) : (

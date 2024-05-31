@@ -7,16 +7,14 @@ import {
   Flex,
   useToast,
   Spinner,
+  Box,
 } from "@chakra-ui/react";
 import Post from "../component/Post";
 import TweetModal from "../component/Inputmodal";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { useEffect, useState } from "react";
-// import { fetchData } from "../database/fetch";
-import { indexerClient } from "../utils/constants";
+import { useState } from "react";
 import { updateProfile } from "../utils/updateProfile";
 import { PostData, UserData } from "../utils/fetchData";
-import RotatingSvgComponent from "../component/loading";
 
 interface ProfileProps {
   username: string;
@@ -34,6 +32,7 @@ const ProfilePage = ({
   userData,
 }: ProfileProps) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -49,6 +48,7 @@ const ProfilePage = ({
       formData.append("type", "file");
       formData.append("title", userData![0].username!);
       try {
+        setIsLoading(true);
         const response = await fetch("https://api.imgur.com/3/image", {
           method: "POST",
           headers: new Headers({
@@ -113,6 +113,7 @@ const ProfilePage = ({
       } catch (error) {
         console.error(error);
       } finally {
+        setIsLoading(false);
         setSelectedImage(null);
         setTimeout(() => {
           window.location.reload();
@@ -121,9 +122,26 @@ const ProfilePage = ({
     } else {
       console.log("No file selected");
     }
+
+    if (isLoading) {
+      return (
+        <Flex justifyContent="center" alignItems="center" height="100vh">
+          <Box width="100px" height="100px">
+            <Spinner
+              thickness="50px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="purple.500"
+            />
+          </Box>
+        </Flex>
+      );
+    }
   };
 
-  const filteredPosts = postData?.filter((post) => post.owner === accountAddress);
+  const filteredPosts = postData?.filter(
+    (post) => post.owner === accountAddress
+  );
   const filterPost = filteredPosts?.length ? filteredPosts : undefined;
 
   return (
@@ -150,8 +168,9 @@ const ProfilePage = ({
           borderWidth="1px"
           borderRadius="0.5rem 0.5rem 0 0"
           w={"80%"}
+          h={"300px"}
           m={"20px 20px 0px 20px"}
-          height={{ sm: "476px", md: "20rem" }}
+          height={{  md: "20rem" }}
           direction={{ base: "column", md: "row" }}
           bg={useColorModeValue("white", "gray.900")}
           boxShadow={"2xl"}

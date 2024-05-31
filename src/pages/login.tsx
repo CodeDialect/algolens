@@ -19,8 +19,6 @@ import { createUser } from "../utils/buyUsername";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { signin } from "../utils/sigin";
 import { checkUser } from "../utils/checkUser";
-import { indexerClient, userNote } from "../utils/constants";
-import RotatingSvgComponent from "../component/loading";
 
 interface LoginProps {
   peraWallet: PeraWalletConnect;
@@ -258,7 +256,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
               onKeyUp={handleUsernameKeyUp}
               maxLength={20}
             />
-            {isLoading && <RotatingSvgComponent  />}
+            {isLoading && <Spinner  />}
             {isSignup &&
               username.trim() !== "" &&
               !isLoading &&

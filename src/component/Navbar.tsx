@@ -30,7 +30,6 @@ import {
 import { deleteEntity } from "../utils/deleteEntity";
 import { useState } from "react";
 import DeleteConfirmation from "./Deletemodal";
-import RotatingSvgComponent from "./loading";
 
 interface NavProps {
   accountAddress: string;
@@ -136,7 +135,12 @@ export default function Nav({
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
-          <RotatingSvgComponent />
+        <Spinner
+            thickness="50px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="purple.500"
+          />
         </Box>
       </Flex>
     );

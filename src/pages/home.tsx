@@ -4,8 +4,7 @@ import Post from "../component/Post";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { PostData, UserData } from "../utils/fetchData";
 import TweetModal from "../component/Inputmodal";
-import { useEffect, useState } from "react";
-import RotatingSvgComponent from "../component/loading";
+
 interface Props {
   username: string;
   peraWallet: PeraWalletConnect;
@@ -24,7 +23,12 @@ export const Home = ({
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
-          <RotatingSvgComponent />
+        <Spinner
+            thickness="50px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="purple.500"
+          />
         </Box>
       </Flex>
     );
