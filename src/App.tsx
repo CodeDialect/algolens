@@ -14,7 +14,6 @@ import {
 } from "./utils/fetchData";
 import { Box, Flex, Spinner } from "@chakra-ui/react";
 import ErrorPage from "./pages/error";
-import { signin } from "./utils/sigin";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("");
@@ -31,9 +30,6 @@ const App = () => {
     return username !== null ? username : "";
   };
 
-  useEffect(() => {
-    document.title = "Algolens";
-  }, []);
 
   useEffect(() => {
     peraWallet.reconnectSession().then((accounts) => {
@@ -47,10 +43,17 @@ const App = () => {
     };
   });
 
+  useEffect(() => {
+    document.title = "Algolens";
+    if(userData && userData[0].loginStatus === 1) {
+      localStorage.setItem("username", userData[0].username!); 
+      document.title = `Algolens - ${getUsername("username")}`;
+    }
+  }, [userData, accountAddress]);
+
   async function handleDisconnectWalletClick(){
-    await signin(accountAddress, peraWallet, "logout");
-    localStorage.removeItem("username");
     peraWallet.disconnect();
+    localStorage.removeItem("username");
     setAccountAddress("");
   }
 
