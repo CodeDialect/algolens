@@ -7,6 +7,7 @@ import {
   useToast,
   Spinner,
   Box,
+  Tooltip,
 } from "@chakra-ui/react";
 import Post from "../component/Post";
 import TweetModal from "../component/Inputmodal";
@@ -36,7 +37,7 @@ const ProfilePage = ({
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const clientID = "37be49d89f76ade";
+    const clientID = process.env.REACT_APP_IMGUR_CLIENT_ID;
     const fileInput = event.target;
 
     if (fileInput.files && fileInput.files.length > 0) {
@@ -48,7 +49,6 @@ const ProfilePage = ({
       formData.append("type", "file");
       formData.append("title", userData![0].username!);
       try {
-        setIsLoading(true);
         const response = await fetch("https://api.imgur.com/3/image", {
           method: "POST",
           headers: new Headers({
@@ -100,7 +100,7 @@ const ProfilePage = ({
           } catch (error) {
             toast({
               title: "Error",
-              description: "Something went wrong",
+              description: "Something went wrong please try again",
               status: "error",
               duration: 9000,
               isClosable: true,
@@ -173,10 +173,10 @@ const ProfilePage = ({
           padding={4}
           overflow={"hidden"}
         >
-          <Flex flex={1}  position="relative">
-            {userData && userData.length > 0 && userData[0]?.profilePicture && (
+          <Flex flex={1} position="relative">
+            {userData && userData.length > 0 && (
+              <Tooltip label="Change Profile Picture">
               <Box
-                backgroundImage={`url(${userData[0].profilePicture})`}
                 style={{
                   cursor: "pointer",
                   backgroundSize: "100% 100%",
@@ -184,6 +184,7 @@ const ProfilePage = ({
                   backgroundPosition: "center",
                   width: "100%",
                   height: "100%",
+                  backgroundImage: `${userData[0]?.profilePicture ? `url(${userData[0].profilePicture})` : 'url("avatar-default.svg")'}`,
                 }}
                 onClick={() => {
                   const fileInput = document.createElement("input");
@@ -198,6 +199,7 @@ const ProfilePage = ({
                   fileInput.click();
                 }}
               />
+              </Tooltip>
             )}
             <input
               type="file"

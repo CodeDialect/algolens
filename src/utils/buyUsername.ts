@@ -58,8 +58,6 @@ export const createUser = async (
   const price = algosdk.encodeUint64(100000);
   let appUserArgs = [signup, userName];
 
-  console.log(new TextDecoder().decode(new Uint8Array(price)));
-  // console.log(new TextDecoder().decode(price));
   const user = await fetchAppUser(senderAddress, userNote);
 
   if (user?.userData !== null) {
@@ -101,7 +99,6 @@ export const createUser = async (
   } catch (error) {
     console.log("Couldn't sign Opt-in txns", error);
   }
-  console.log("Signed transaction with txID: %s", txId);
 
   // Wait for transaction to be confirmed
   let confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
@@ -146,7 +143,7 @@ export const createUser = async (
 
   let signedTxn = await perawallet.signTransaction([multipleTxnGroups]);
 
-  let tx = await algodClient
+  await algodClient
     .sendRawTransaction(signedTxn)
     .do()
     .catch(async () => {
@@ -183,5 +180,5 @@ export const createUser = async (
           confirmedDelAppTxn["confirmed-round"]
       );
     });
-  return "User created successfully with txID: " + tx.txId;
+  return "User created successfully";
 };

@@ -36,5 +36,5 @@ export const checkUser = async (username: string): Promise<string> => {
     }
     return "Username is available";
   }
-  return "Something went wrong";
+  return "Something went wrong please try again";
 };

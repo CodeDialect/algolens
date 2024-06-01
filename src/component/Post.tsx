@@ -90,7 +90,7 @@ const Post: React.FC<PostProps> = ({
     } catch (error) {
       toast({
         title: "Error",
-        description: "Something went wrong",
+        description: "Something went wrong please try again",
         status: "error",
         duration: 9000,
         isClosable: true,
@@ -105,7 +105,7 @@ const Post: React.FC<PostProps> = ({
   };
   useEffect(() => {
     const fetchPostData = async () => {
-      if (postData) {
+      if (postData && postData.length > 0) {
         const resultArray = [];
         for (const post of postData) {
           const result = await updatePostBy(Number(post.postBy));
@@ -118,6 +118,14 @@ const Post: React.FC<PostProps> = ({
 
     fetchPostData();
   }, [postData]);
+
+  const sortedPostData =
+    postData &&
+    postData.sort((a, b) => {
+      const dateA = new Date(a.timestamp);
+      const dateB = new Date(b.timestamp);
+      return dateB.getTime() - dateA.getTime();
+    });
 
   if (loading || isDeleting)
     return (
@@ -134,9 +142,8 @@ const Post: React.FC<PostProps> = ({
     );
   return (
     <>
-      {postData &&
-        postData.map((post, index) => {
-          const result: string = resultData[index];
+      {sortedPostData &&
+        sortedPostData.map((post, index) => {
           return (
             <Card
               background={"linear-gradient(45deg, rgb(167 143 221), #6b46fe)"}
@@ -181,18 +188,14 @@ const Post: React.FC<PostProps> = ({
                 >
                   <Link cursor={"default"} href={`/profile`}>
                     <Avatar
-                      src={
-                        userData && userData[0] && userData[0].profilePicture
-                          ? userData[0].profilePicture
-                          : ""
-                      }
+                      src={resultData[index].userPic}
                       data-type="Avatar"
                     ></Avatar>
                   </Link>
                   <Box data-type="Box">
                     <Heading data-type="Heading" size="sm">
-                      {result.charAt(0).toUpperCase() +
-                        result.slice(1).toLowerCase()}
+                      {resultData[index].username.charAt(0).toUpperCase() +
+                        resultData[index].username.slice(1).toLowerCase()}
                     </Heading>
                     <Text data-type="Text">
                       {post.timestamp.toLocaleString()}

@@ -31,6 +31,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
   const op = "login";
   const toast = useToast();
+
   const handleSignupClick = () => {
     setIsSignup(!isSignup);
     setUsername("");
@@ -38,6 +39,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   };
 
   const handleSignup = async (username: string) => {
+    setIsLoading(true);
     if (username.trim() === "") {
       return;
     }
@@ -98,11 +100,16 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     } catch (err) {
       toast({
         title: "Error",
-        description: "Something went wrong" + err, // Corrected variable name
+        description: "Something went wrong please try again" + err, // Corrected variable name
         status: "error",
         duration: 9000,
         isClosable: true,
       });
+    }
+    finally {
+      setIsLoading(false);
+      setUsername("");
+      handleSignupClick();
     }
   };
 
@@ -159,7 +166,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     try {
       setIsLoading(true);
       const response = await signin(accountAddress, peraWallet, op);
-      if (response?.includes("logged in successfully")) {
+      if (response && response.includes("logged in successfully")) {
         toast({
           title: "Success",
           description: response,

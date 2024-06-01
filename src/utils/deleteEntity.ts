@@ -35,7 +35,7 @@ export const deleteEntity = async (
     const deletePostGroup: any[] = [];
 
     if (userPosts["transactions"].length === 0) {
-      return null;
+      return null
     } else {
       await Promise.all(
         userPosts.transactions.map(
@@ -65,6 +65,7 @@ export const deleteEntity = async (
           appIndex: appId,
           suggestedParams: params,
         });
+        
 
         const singleTransaction: SignerTransaction[] = [
           {
@@ -144,6 +145,10 @@ export const deleteEntity = async (
                 " confirmed in round " +
                 confirmedDelAppTxn["confirmed-round"]
             );
+            return {
+              success: true,
+              message: "User deleted successfully",
+            };
           })
           .catch(() => {
             return {

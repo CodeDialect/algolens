@@ -80,7 +80,6 @@ export default function Nav({
   };
 
   const handleDeleteConfirmation = () => {
-    console.log(userId);
     handleDeleteUser(userId);
     setIsDeleteConfirmationOpen(false);
   };
@@ -89,6 +88,7 @@ export default function Nav({
     try {
       setIsDeleting(true);
       const result = await deleteEntity(accountAddress, userId, peraWallet);
+      console.log(result);
       if (result?.success) {
         toast({
           title: "Success",
@@ -109,7 +109,7 @@ export default function Nav({
     } catch (error) {
       toast({
         title: "Error",
-        description: "Something went wrong",
+        description: "Something went wrong please try again",
         status: "error",
         duration: 9000,
         isClosable: true,
@@ -149,7 +149,7 @@ export default function Nav({
       } catch (error) {
         toast({
           title: "Error",
-          description: "Something went wrong",
+          description: "Something went wrong please try again",
           status: "error",
           duration: 9000,
           isClosable: true,

@@ -81,7 +81,7 @@ const TweetModal = ({
     try {
       const response = await post(senderAddress, peraWallet, tweet);
       handleCloseModal();
-      if (response === "Post Successfully Created") {
+      if (response && response === "Post Successfully Created") {
         toast({
           title: "Success",
           description: response,
@@ -185,7 +185,7 @@ const TweetModal = ({
                 transition: "transform 0.3s ease-in-out",
               }}
             >
-              {isLoading ? "Posting..." : "Post"}
+              Post
             </Button>
             <Button
               isDisabled={isLoading}

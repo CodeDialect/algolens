@@ -42,7 +42,7 @@ export const fetchAppUser = async (
   if (response["transactions"].length === 0) return null;
   const appId: number =
     response["transactions"][0]["created-application-index"];
-  const userData = await fetchUserData(appId);
+    const userData = await fetchUserData(appId);
   return { userData, appId };
 };
 
@@ -53,10 +53,10 @@ export const fetchUserData = async (appId: number) => {
     .lookupApplications(appId)
     .includeAll(true)
     .do();
-  if (response.application.deleted === true) {
+    if (response.application.deleted === true) {
     return null;
   }
-
+  
   const globalState = await response.application.params["global-state"];
   if (globalState === undefined) return null;
   userData.push({
@@ -137,7 +137,13 @@ export const updatePostBy = async (appId: number) => {
   const username = base64ToUTF8String(
     getField("USERNAME", globalState).value.bytes
   );
-  return username;
+  const userPic = base64ToUTF8String(
+    getField("PICTURE", globalState).value.bytes
+  );
+  return {
+    username,
+    userPic,
+  };
 };
 
 export async function fetchData() {

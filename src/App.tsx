@@ -45,7 +45,8 @@ const App = () => {
 
   useEffect(() => {
     document.title = "Algolens";
-    if(userData && userData[0].loginStatus === 1) {
+    
+    if(userData && userData[0] && userData[0].loginStatus === 1) {
       localStorage.setItem("username", userData[0].username!); 
       document.title = `Algolens - ${getUsername("username")}`;
     }
@@ -98,7 +99,6 @@ const App = () => {
     }
     fetchPostData();
   }, [accountAddress, setPostData]);
-
   useEffect(() => {
     async function fetchUserData() {
       if (accountAddress) {
