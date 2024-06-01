@@ -29,17 +29,18 @@ for faucet: https://bank.testnet.algorand.network/
     ```bash
    cd algolens
      ```
-  2.1 Edit Enviornment Variable [.env.example]
-      
-  rename the .env.example to: 
-  ```bash 
-     .env 
-  ```
-     
-  Update .env
-  ```bash 
-     REACT_APP_IMGUR_CLIENT_ID= YOUR_IMGUR_CLIENT_ID (from imgur.com)
-  ```
+  
+    2.1 Edit Enviornment Variable [.env.example]
+        
+    rename the .env.example to: 
+    ```bash 
+       .env 
+    ```
+       
+    Update .env
+    ```bash 
+       REACT_APP_IMGUR_CLIENT_ID= YOUR_IMGUR_CLIENT_ID (from imgur.com)
+    ```
 
 
 # Getting Started with Create React App
