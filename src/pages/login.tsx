@@ -39,7 +39,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   };
 
   const handleSignup = async (username: string) => {
-    setIsLoading(true);
+    
     if (username.trim() === "") {
       return;
     }
@@ -77,6 +77,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     }
 
     try {
+      setIsLoading(true);
       const response = await createUser(peraWallet, accountAddress, {
         username: username,
       });
@@ -114,20 +115,6 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   };
 
   const handleLogin = async (username: string) => {
-    setIsLoading(true);
-    const response = await checkUser(username);
-    if (response === "Username is available") {
-      toast({
-        title: "Error",
-        description: "Username not found",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-      return;
-    }
-
     if (username.trim() === "") {
       toast({
         title: "Error",
@@ -136,7 +123,6 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
-      setIsLoading(false);
       return;
     }
 
@@ -148,7 +134,6 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
-      setIsLoading(false);
       return;
     }
 
@@ -160,9 +145,21 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
-      setIsLoading(false);
       return;
     }
+
+   const response = await checkUser(username);
+    if (response === "Username is available") {
+      toast({
+        title: "Error",
+        description: "Username not found",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await signin(accountAddress, peraWallet, op);
