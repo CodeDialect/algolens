@@ -35,6 +35,7 @@ for faucet: https://bank.testnet.algorand.network/
      ```bash 
      .env 
      ```
+     
      Update .env
      ```bash 
      REACT_APP_IMGUR_CLIENT_ID= YOUR_IMGUR_CLIENT_ID (from imgur.com)
