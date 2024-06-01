@@ -94,9 +94,6 @@ const TweetModal = ({ senderAddress, peraWallet, userProfile }: TweetModalProps)
       });
     } finally {
       setIsLoading(false);
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
     }
   };
 

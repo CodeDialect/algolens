@@ -16,7 +16,6 @@ import { Box, Flex, Spinner } from "@chakra-ui/react";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("");
-  const [quotaError, setQuotaError] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserData[]>();
   const [postData, setPostData] = useState<PostData[]>([]);
   const [isLoading, setIsLoading] = useState(false);

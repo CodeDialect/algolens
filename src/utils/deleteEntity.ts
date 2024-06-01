@@ -1,7 +1,7 @@
 import { PeraWalletConnect } from "@perawallet/connect";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import algosdk from "algosdk";
-import { algodClient, indexerClient, postNote, userNote } from "./constants";
+import { algodClient, indexerClient, postNote} from "./constants";
 
 export const deleteEntity = async (
   accountAddress: string | null,
@@ -101,7 +101,7 @@ export const deleteEntity = async (
 
         const multipleTxnGroups: SignerTransaction[] = [];
         deletePostGroup.map((txn) => {
-          multipleTxnGroups.push({
+          return multipleTxnGroups.push({
             txn: txn,
             signers: [accountAddress],
           });

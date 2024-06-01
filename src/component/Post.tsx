@@ -1,4 +1,4 @@
-import { DeleteIcon, LinkIcon } from "@chakra-ui/icons";
+import { DeleteIcon } from "@chakra-ui/icons";
 import {
   Box,
   Card,
@@ -12,6 +12,7 @@ import {
   Button,
   Spinner,
   useToast,
+  Link,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { PostData, updatePostBy, UserData } from "../utils/fetchData";
@@ -65,6 +66,7 @@ const Post: React.FC<PostProps> = ({
     setIsDeleteConfirmationOpen(false);
   };
 
+
   const handleDeletePost = async (postId: number | null) => {
     try {
       setIsDeleting(true);
@@ -116,14 +118,13 @@ const Post: React.FC<PostProps> = ({
     };
 
     fetchPostData();
-  }, [postData, updatePostBy]);
-  // const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
+  }, [postData]);
 
   if (loading || isDeleting)
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
-        <Spinner
+          <Spinner
             thickness="50px"
             speed="0.65s"
             emptyColor="gray.200"
@@ -132,15 +133,13 @@ const Post: React.FC<PostProps> = ({
         </Box>
       </Flex>
     );
-
-    console.log(resultData);
-    if(resultData.length === 0){
-      return (
-        <Flex justifyContent="center" alignItems="center" height="100vh">
-          <Text color={"white"}>No posts found</Text>
-        </Flex>
-      );
-    }
+  if (postData && postData.length === 0 && resultData.length === 0) {
+    return (
+      <Flex justifyContent="center" alignItems="center" height="100vh">
+        <Text color={"white"}>No posts found</Text>
+      </Flex>
+    );
+  }
   return (
     <>
       {postData &&
@@ -187,14 +186,16 @@ const Post: React.FC<PostProps> = ({
                   alignItems="center"
                   flexWrap="wrap"
                 >
-                  <Avatar
-                    src={
-                      userData && userData[0] && userData[0].profilePicture
-                        ? userData[0].profilePicture
-                        : ""
-                    }
-                    data-type="Avatar"
-                  ></Avatar>
+                  <Link cursor={"default"} href={`/profile`}>
+                    <Avatar
+                      src={
+                        userData && userData[0] && userData[0].profilePicture
+                          ? userData[0].profilePicture
+                          : ""
+                      }
+                      data-type="Avatar"
+                    ></Avatar>
+                  </Link>
                   <Box data-type="Box">
                     <Heading data-type="Heading" size="sm">
                       {result}
@@ -213,9 +214,6 @@ const Post: React.FC<PostProps> = ({
                 justify="space-between"
                 flexWrap="wrap"
               >
-                <Button data-type="Button" flex="1" leftIcon={<LinkIcon />}>
-                  Share
-                </Button>
                 <Flex alignItems="center" color="black" ml={"10px"}></Flex>
               </CardFooter>
             </Card>

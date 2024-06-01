@@ -1,4 +1,4 @@
-import { indexerClient, minRound, postNote, userNote } from "./constants";
+import { indexerClient, minRound, userNote } from "./constants";
 import { base64ToUTF8String, utf8ToBase64String } from "./conversion";
 
 export interface UserData {
@@ -30,7 +30,7 @@ const getField = (
 
 export const fetchAppUser = async (
   senderAddress: string,
-  notePrefix: Uint8Array,
+  notePrefix: Uint8Array
 ) => {
   const response = await indexerClient
     .searchForTransactions()
@@ -39,8 +39,9 @@ export const fetchAppUser = async (
     .txType("appl")
     .limit(1)
     .do();
-  if(response["transactions"].length === 0) return null
-  const appId: number = response["transactions"][0]["created-application-index"];
+  if (response["transactions"].length === 0) return null;
+  const appId: number =
+    response["transactions"][0]["created-application-index"];
   const userData = await fetchUserData(appId);
   return { userData, appId };
 };
@@ -52,7 +53,6 @@ export const fetchUserData = async (appId: number) => {
     .lookupApplications(appId)
     .includeAll(true)
     .do();
-
   if (response.application.deleted === true) {
     return null;
   }
@@ -71,16 +71,14 @@ export const fetchUserData = async (appId: number) => {
   return userData;
 };
 
-export const fetchUserPosts = async (
-  notePrefix: Uint8Array
-) => {
+export const fetchUserPosts = async (notePrefix: Uint8Array) => {
   const response = await indexerClient
-    .searchForTransactions().minRound(minRound)
+    .searchForTransactions()
+    .minRound(minRound)
     .notePrefix(notePrefix)
     .txType("appl")
     .do()
-    .catch((error) => {
-      console.log(error);
+    .catch(() => {
       return { transactions: [] };
     });
 
@@ -92,6 +90,7 @@ export const fetchUserPosts = async (
     (transaction: { [x: string]: any }) =>
       transaction["created-application-index"]
   );
+
   const postsData = await fetchPostsData(applicationTransactions);
   return { postsData, applicationTransactions };
 };
@@ -110,7 +109,7 @@ export const fetchPostsData = async (appIds: number[]) => {
   );
 
   for (const response of responses) {
-    if(response === null) return null
+    if (response === null) return null;
     if (response.application.deleted === true) {
       continue;
     }
@@ -128,24 +127,24 @@ export const fetchPostsData = async (appIds: number[]) => {
   return posts;
 };
 
-export const updatePostBy = async (
-  appId: number,
-) => {
+export const updatePostBy = async (appId: number) => {
   const params = await indexerClient
     .lookupApplications(appId)
     .includeAll(true)
     .do();
   const globalState = params.application.params["global-state"];
   if (globalState === undefined) return null;
-  const username = base64ToUTF8String(getField("USERNAME", globalState).value.bytes);
+  const username = base64ToUTF8String(
+    getField("USERNAME", globalState).value.bytes
+  );
   return username;
-}
-
+};
 
 export async function fetchData() {
   const response = await indexerClient
     .searchForTransactions()
-    .notePrefix(userNote).minRound(minRound)
+    .notePrefix(userNote)
+    .minRound(minRound)
     .do();
-    return response
+  return response;
 }

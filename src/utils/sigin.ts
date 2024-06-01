@@ -1,12 +1,10 @@
-import { algodClient, indexerClient, userNote } from "./constants";
+import { algodClient, userNote } from "./constants";
 import algosdk from "algosdk";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { base64ToUTF8String, utf8ToBase64String } from "./conversion";
-import { fetchAppUser, fetchUserData } from "./fetchData";
+import { fetchAppUser } from "./fetchData";
 
 export const signin = async (
-  username: string,
   senderAddress: string,
   perawallet: PeraWalletConnect,
   op: string
@@ -24,7 +22,6 @@ export const signin = async (
   let params = await algodClient.getTransactionParams().do();
   params.fee = algosdk.ALGORAND_MIN_TX_FEE;
   params.flatFee = true;
-  const user = new TextEncoder().encode(username);
 
   if (senderAddress === null) {
     throw new Error("Please connect your wallet");
@@ -45,8 +42,10 @@ export const signin = async (
     }
 
     if (user.userData[0].loginStatus === 1 && op === "login") {
-      return "User already logged in";
+      return "User already loggedin on another device";
     }
+
+    console.log(user.userData)
 
     let appArgs = [operation, new TextEncoder().encode(user.userData[0].username)];
     try {

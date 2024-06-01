@@ -12,7 +12,6 @@ import {
   Image,
   Link,
   FormHelperText,
-  Spinner,
   useToast,
 } from "@chakra-ui/react";
 import { createUser } from "../utils/buyUsername";
@@ -53,7 +52,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       });
       return;
     }
-    if(username.length > 20) {
+    if (username.length > 20) {
       toast({
         title: "Error",
         description: "Username must be less than 20 characters",
@@ -108,6 +107,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   };
 
   const handleLogin = async (username: string) => {
+    setIsLoading(true);
     const response = await checkUser(username);
     if (response === "Username is available") {
       toast({
@@ -117,6 +117,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
@@ -128,6 +129,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
@@ -139,6 +141,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
@@ -150,22 +153,20 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
     try {
       setIsLoading(true);
-      const response = await signin(username, accountAddress, peraWallet, op);
-
-      if (localStorage.getItem("username") === username) {
+      const response = await signin(accountAddress, peraWallet, op);
+      if (response?.includes("User signed in successfully")) {
         toast({
           title: "Success",
-          description: "User logged in successfully",
+          description: response,
           status: "success",
           duration: 9000,
           isClosable: true,
         });
-        setIsLoading(false);
-        window.location.reload();
       } else {
         toast({
           title: "Error",
@@ -175,7 +176,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
           isClosable: true,
         });
       }
-      setIsLoading(false);
+      // window.location.reload();
     } catch (err) {
       toast({
         title: "Error",
@@ -184,6 +185,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -205,8 +207,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       const response = await checkUser(e.currentTarget.value);
       if (response === "Username is available") {
         setIsUsernameAvailable(true);
-      }
-      else{
+      } else {
         setIsUsernameAvailable(false);
       }
       setIsLoading(false);
@@ -256,7 +257,6 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
               onKeyUp={handleUsernameKeyUp}
               maxLength={20}
             />
-            {isLoading && <Spinner  />}
             {isSignup &&
               username.trim() !== "" &&
               !isLoading &&
@@ -272,6 +272,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
           </FormControl>
         </Stack>
         <Button
+          isLoading={isLoading}
           _hover={{
             transform: "scale(1.05)",
             transition: "transform 0.3s ease-in-out",

@@ -4,6 +4,7 @@ import Post from "../component/Post";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { PostData, UserData } from "../utils/fetchData";
 import TweetModal from "../component/Inputmodal";
+import { useEffect, useState } from "react";
 
 interface Props {
   username: string;
@@ -19,11 +20,26 @@ export const Home = ({
   userData,
   postsData,
 }: Props) => {
+  const [showSidebar, setShowSidebar] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowSidebar(window.innerWidth > 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Initial check on mount
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   if (userData === undefined) {
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
-        <Spinner
+          <Spinner
             thickness="50px"
             speed="0.65s"
             emptyColor="gray.200"
@@ -37,7 +53,7 @@ export const Home = ({
     <Flex
       backgroundImage={"linear-gradient(195deg, rgb(0 0 0), rgb(88 26 232))"}
     >
-      {window.innerWidth > 700 && <TwitterSidebar userData={userData} />}
+      {showSidebar && <TwitterSidebar userData={userData} />}
       <TweetModal
         userProfile={
           userData && userData[0] && userData[0].profilePicture
@@ -61,13 +77,16 @@ export const Home = ({
             msOverflowStyle: "none",
           }}
         >
-          <Post
-            accountAddress={accountAddress}
-            peraWallet={peraWallet}
-            postData={postsData}
-            userData={userData}
-            width="90%"
-          />
+          {" "}
+          {postsData && postsData.length > 0 && (
+            <Post
+              accountAddress={accountAddress}
+              peraWallet={peraWallet}
+              postData={postsData}
+              userData={userData}
+              width="90%"
+            />
+          )}
         </div>
       </Stack>
     </Flex>

@@ -19,7 +19,7 @@ byte "post-algolens"
 ==
 assert
 txn NumAppArgs
-int 3
+int 2
 ==
 assert
 byte "POST"

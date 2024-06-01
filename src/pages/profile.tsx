@@ -2,7 +2,6 @@ import {
   Heading,
   Text,
   Stack,
-  Badge,
   useColorModeValue,
   Flex,
   useToast,
@@ -170,7 +169,6 @@ const ProfilePage = ({
           w={"80%"}
           h={"300px"}
           m={"20px 20px 0px 20px"}
-          height={{  md: "20rem" }}
           direction={{ base: "column", md: "row" }}
           bg={useColorModeValue("white", "gray.900")}
           boxShadow={"2xl"}
@@ -180,7 +178,7 @@ const ProfilePage = ({
             {userData && userData.length > 0 && userData[0]?.profilePicture && (
               <img
                 src={userData[0].profilePicture}
-                alt="Selected Image"
+                alt="Profile"
                 style={{
                   cursor: "pointer",
                   objectFit: "cover",

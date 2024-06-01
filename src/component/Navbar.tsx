@@ -28,7 +28,7 @@ import {
   HamburgerIcon,
 } from "@chakra-ui/icons";
 import { deleteEntity } from "../utils/deleteEntity";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteConfirmation from "./Deletemodal";
 
 interface NavProps {
@@ -53,6 +53,20 @@ export default function Nav({
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
     useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+  const [showProfileButton, setShowProfileButton] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowProfileButton(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Initial check on mount
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const handleDelete = (userId: number) => {
     if (userId === null || userId === undefined) return;
@@ -113,7 +127,6 @@ export default function Nav({
   const handleLogout = async () => {
     if (username !== "" && accountAddress) {
       const result = await signin(
-        username,
         accountAddress,
         peraWallet,
         "logout"
@@ -135,7 +148,7 @@ export default function Nav({
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
-        <Spinner
+          <Spinner
             thickness="50px"
             speed="0.65s"
             emptyColor="gray.200"
@@ -212,10 +225,14 @@ export default function Nav({
                     </Center>
                     <br />
                     <MenuDivider />
-                    {window.innerWidth < 700 && (
+                    {showProfileButton && (
                       <>
-                        <MenuItem icon={<HamburgerIcon />}>
-                          <Link href="/profile">Profile</Link>
+                        <MenuItem
+                          as={Link}
+                          href="/profile"
+                          icon={<HamburgerIcon />}
+                        >
+                          Profile
                         </MenuItem>
                         <MenuDivider />
                       </>
