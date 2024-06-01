@@ -156,11 +156,12 @@ export default function Nav({
         });
       } finally {
         setIsLoading(false);
+        localStorage.removeItem("username");
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }
     }
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
   };
 
   if (isDeleting || isLoading) {

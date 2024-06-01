@@ -40,6 +40,7 @@ const ProfilePage = ({
     const fileInput = event.target;
 
     if (fileInput.files && fileInput.files.length > 0) {
+      setIsLoading(true);
       const file = fileInput.files[0];
       setSelectedImage(file);
       const formData = new FormData();
@@ -76,9 +77,6 @@ const ProfilePage = ({
             duration: 9000,
             isClosable: true,
           });
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
         }
         if (updateResponse.error) {
           try {
@@ -115,7 +113,7 @@ const ProfilePage = ({
         setIsLoading(false);
         setSelectedImage(null);
         setTimeout(() => {
-          // window.location.reload();
+          window.location.reload();
         }, 500);
       }
     } else {
