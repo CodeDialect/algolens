@@ -2,6 +2,10 @@
 
 AlgoLens is a social media platform where users can buy a username to sign in. Users can find all the user posts on the home page and see their profile photo or set it accordingly.
 
+App Link 
+[https://algolens.vercel.app](https://algolens.vercel.app/)
+
+
 ## Technologies Used
 
 - React
