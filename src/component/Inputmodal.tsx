@@ -24,7 +24,11 @@ interface TweetModalProps {
   userProfile: string;
 }
 
-const TweetModal = ({ senderAddress, peraWallet, userProfile }: TweetModalProps) => {
+const TweetModal = ({
+  senderAddress,
+  peraWallet,
+  userProfile,
+}: TweetModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [tweet, setTweet] = useState("");
@@ -77,23 +81,37 @@ const TweetModal = ({ senderAddress, peraWallet, userProfile }: TweetModalProps)
     try {
       const response = await post(senderAddress, peraWallet, tweet);
       handleCloseModal();
-      toast({
-        title: "Error",
-        description: response,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      if (response === "Post Successfully Created") {
+        toast({
+          title: "Success",
+          description: response,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: response,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
-        description: "An error occurred while posting the tweet.",
+        description: "An error occurred while posting.",
         status: "error",
         duration: 3000,
         isClosable: true,
       });
     } finally {
+      setTweet("");
       setIsLoading(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
   };
 
@@ -124,8 +142,8 @@ const TweetModal = ({ senderAddress, peraWallet, userProfile }: TweetModalProps)
       <Modal isOpen={isOpen} onClose={handleCloseModal} size="lg">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Write a Tweet</ModalHeader>
-          <ModalCloseButton />
+          <ModalHeader>Write a Post</ModalHeader>
+          <ModalCloseButton isDisabled={isLoading}  />
 
           <ModalBody>
             <Flex alignItems="center">
@@ -170,6 +188,7 @@ const TweetModal = ({ senderAddress, peraWallet, userProfile }: TweetModalProps)
               {isLoading ? "Posting..." : "Post"}
             </Button>
             <Button
+              isDisabled={isLoading}
               ml={3}
               color={"white"}
               backgroundColor={"red.500"}

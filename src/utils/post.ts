@@ -151,7 +151,7 @@ export const post = async (
         " confirmed in round " +
         confirmedTxn["confirmed-round"]
     );
-    return "Post Successful";
+    return "Post Successfully Created";
   } catch (error) {
     console.log(error);
   }

@@ -1,4 +1,4 @@
-import { Stack, Flex, Spinner, Box } from "@chakra-ui/react";
+import { Stack, Flex, Spinner, Box, Text } from "@chakra-ui/react";
 import TwitterSidebar from "../component/Sidebar";
 import Post from "../component/Post";
 import { PeraWalletConnect } from "@perawallet/connect";
@@ -78,7 +78,7 @@ export const Home = ({
           }}
         >
           {" "}
-          {postsData && postsData.length > 0 && (
+          {postsData && postsData.length > 0 ? (
             <Post
               accountAddress={accountAddress}
               peraWallet={peraWallet}
@@ -86,6 +86,10 @@ export const Home = ({
               userData={userData}
               width="90%"
             />
+          ) : (
+            <Flex justifyContent="center" alignItems="center" height="100vh">
+              <Text color={"white"}>No posts found</Text>
+            </Flex>
           )}
         </div>
       </Stack>

@@ -115,7 +115,7 @@ const ProfilePage = ({
         setIsLoading(false);
         setSelectedImage(null);
         setTimeout(() => {
-          window.location.reload();
+          // window.location.reload();
         }, 500);
       }
     } else {
@@ -160,8 +160,8 @@ const ProfilePage = ({
       <Flex
         direction={"column"}
         w={"100%"}
-        justifyContent={"center"}
         alignItems={"center"}
+        justifyContent={"center"}
       >
         <Stack
           borderWidth="1px"
@@ -173,15 +173,17 @@ const ProfilePage = ({
           bg={useColorModeValue("white", "gray.900")}
           boxShadow={"2xl"}
           padding={4}
+          overflow={"hidden"}
         >
-          <Flex flex={1} bg="blue.200" position="relative">
+          <Flex flex={1}  position="relative">
             {userData && userData.length > 0 && userData[0]?.profilePicture && (
-              <img
-                src={userData[0].profilePicture}
-                alt="Profile"
+              <Box
+                backgroundImage={`url(${userData[0].profilePicture})`}
                 style={{
                   cursor: "pointer",
-                  objectFit: "cover",
+                  backgroundSize: "100% 100%",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
                   width: "100%",
                   height: "100%",
                 }}

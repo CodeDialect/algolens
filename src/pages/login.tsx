@@ -159,7 +159,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     try {
       setIsLoading(true);
       const response = await signin(accountAddress, peraWallet, op);
-      if (response?.includes("User signed in successfully")) {
+      if (response?.includes("logged in successfully")) {
         toast({
           title: "Success",
           description: response,
@@ -187,6 +187,9 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       });
     } finally {
       setIsLoading(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
   };
 

@@ -54,6 +54,7 @@ export default function Nav({
     useState(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [showProfileButton, setShowProfileButton] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -85,7 +86,6 @@ export default function Nav({
   };
 
   const handleDeleteUser = async (userId: number | null) => {
-    console.log(userId);
     try {
       setIsDeleting(true);
       const result = await deleteEntity(accountAddress, userId, peraWallet);
@@ -125,26 +125,45 @@ export default function Nav({
   };
 
   const handleLogout = async () => {
+    setIsLoading(true);
     if (username !== "" && accountAddress) {
-      const result = await signin(
-        accountAddress,
-        peraWallet,
-        "logout"
-      );
-      toast({
-        title: "Success",
-        description: result,
-        status: "success",
-        duration: 9000,
-        isClosable: true,
-      });
+      try {
+        const result = await signin(accountAddress, peraWallet, "logout");
+        if (result === "logged out successfully") {
+          toast({
+            title: "Success",
+            description: result,
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: result,
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Something went wrong",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
     setTimeout(() => {
       window.location.reload();
     }, 500);
   };
 
-  if (isDeleting) {
+  if (isDeleting || isLoading) {
     return (
       <Flex justifyContent="center" alignItems="center" height="100vh">
         <Box width="100px" height="100px">
@@ -276,6 +295,7 @@ export default function Nav({
                 isOpen={isDeleteConfirmationOpen}
                 onClose={handleDeleteCancel}
                 onConfirm={() => handleDeleteConfirmation()}
+                askText="Are you sure you want to delete your account and posts?"
               />
             </Stack>
           </Flex>

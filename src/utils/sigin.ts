@@ -45,8 +45,6 @@ export const signin = async (
       return "User already loggedin on another device";
     }
 
-    console.log(user.userData)
-
     let appArgs = [operation, new TextEncoder().encode(user.userData[0].username)];
     try {
       const signTxn = algosdk.makeApplicationCallTxnFromObject({

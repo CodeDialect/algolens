@@ -14,6 +14,7 @@ import {
 } from "./utils/fetchData";
 import { Box, Flex, Spinner } from "@chakra-ui/react";
 import ErrorPage from "./pages/error";
+import { signin } from "./utils/sigin";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("");
@@ -46,9 +47,10 @@ const App = () => {
     };
   });
 
-  function handleDisconnectWalletClick() {
-    peraWallet.disconnect();
+  async function handleDisconnectWalletClick(){
+    await signin(accountAddress, peraWallet, "logout");
     localStorage.removeItem("username");
+    peraWallet.disconnect();
     setAccountAddress("");
   }
 

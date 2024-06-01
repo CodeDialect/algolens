@@ -66,7 +66,6 @@ const Post: React.FC<PostProps> = ({
     setIsDeleteConfirmationOpen(false);
   };
 
-
   const handleDeletePost = async (postId: number | null) => {
     try {
       setIsDeleting(true);
@@ -133,13 +132,6 @@ const Post: React.FC<PostProps> = ({
         </Box>
       </Flex>
     );
-  if (postData && postData.length === 0 && resultData.length === 0) {
-    return (
-      <Flex justifyContent="center" alignItems="center" height="100vh">
-        <Text color={"white"}>No posts found</Text>
-      </Flex>
-    );
-  }
   return (
     <>
       {postData &&
@@ -161,6 +153,7 @@ const Post: React.FC<PostProps> = ({
                 <DeleteConfirmation
                   isOpen={isDeleteConfirmationOpen}
                   onClose={handleDeleteCancel}
+                  askText="Are you sure you want to delete this post?"
                   onConfirm={() => handleDeleteConfirmation()}
                 />
                 {hoveredPostIndex === index &&
@@ -198,7 +191,8 @@ const Post: React.FC<PostProps> = ({
                   </Link>
                   <Box data-type="Box">
                     <Heading data-type="Heading" size="sm">
-                      {result}
+                      {result.charAt(0).toUpperCase() +
+                        result.slice(1).toLowerCase()}
                     </Heading>
                     <Text data-type="Text">
                       {post.timestamp.toLocaleString()}

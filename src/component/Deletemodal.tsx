@@ -13,12 +13,14 @@ type DeleteConfirmationProps = {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  askText: string;
 };
 
 const DeleteConfirmation = ({
   isOpen,
   onClose,
   onConfirm,
+  askText
 }: DeleteConfirmationProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -27,7 +29,7 @@ const DeleteConfirmation = ({
         <ModalHeader>Delete Confirmation</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          Are you sure you want to delete item? This action cannot be
+          {askText} This action cannot be
           undone.
         </ModalBody>
         <ModalFooter>
