@@ -13,6 +13,7 @@ import {
   UserData,
 } from "./utils/fetchData";
 import { Box, Flex, Spinner } from "@chakra-ui/react";
+import ErrorPage from "./pages/error";
 
 const App = () => {
   const [accountAddress, setAccountAddress] = useState("");
@@ -110,12 +111,12 @@ const App = () => {
   return isLoading ? (
     <Flex justifyContent="center" alignItems="center" height="100vh">
       <Box width="100px" height="100px">
-      <Spinner
-            thickness="50px"
-            speed="0.65s"
-            emptyColor="gray.200"
-            color="purple.500"
-          />
+        <Spinner
+          thickness="50px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="purple.500"
+        />
       </Box>
     </Flex>
   ) : (
@@ -177,6 +178,9 @@ const App = () => {
               )
             }
           />
+          <Route path="*">
+            <ErrorPage />
+          </Route>
         </Switch>
       </Router>
     </>
