@@ -38,7 +38,6 @@ const ProfilePage = ({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const clientID = process.env.REACT_APP_IMGUR_CLIENT_ID;
-    console.log(clientID);
     const fileInput = event.target;
     if (fileInput.files && fileInput.files.length > 0) {
       setIsLoading(true);
