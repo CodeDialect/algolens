@@ -111,7 +111,7 @@ const ProfilePage = ({
       } finally {
         setIsLoading(false);
         setSelectedImage(null);
-        
+        setTimeout(() => window.location.reload(),500);
       }
     } else {
       console.log("No file selected");
