@@ -61,7 +61,6 @@ export const createUser = async (
   const user = await fetchAppUser(senderAddress, userNote);
 
   if (user?.userData !== null) {
-    console.log(user);
     return "A Username already exists! with this address";
   }
 

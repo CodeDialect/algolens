@@ -29,7 +29,6 @@ export const signin = async (
 
   try {
     const user = await fetchAppUser(senderAddress, userNote);
-    console.log(user);
     if(user === null) {
       return "User not found";
     }

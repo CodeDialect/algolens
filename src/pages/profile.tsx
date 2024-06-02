@@ -39,7 +39,6 @@ const ProfilePage = ({
   ) => {
     const clientID = process.env.REACT_APP_IMGUR_CLIENT_ID;
     const fileInput = event.target;
-
     if (fileInput.files && fileInput.files.length > 0) {
       setIsLoading(true);
       const file = fileInput.files[0];
@@ -112,9 +111,7 @@ const ProfilePage = ({
       } finally {
         setIsLoading(false);
         setSelectedImage(null);
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
+        
       }
     } else {
       console.log("No file selected");
@@ -176,29 +173,33 @@ const ProfilePage = ({
           <Flex flex={1} position="relative">
             {userData && userData.length > 0 && (
               <Tooltip label="Change Profile Picture">
-              <Box
-                style={{
-                  cursor: "pointer",
-                  backgroundSize: "100% 100%",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  width: "100%",
-                  height: "100%",
-                  backgroundImage: `${userData[0]?.profilePicture ? `url(${userData[0].profilePicture})` : 'url("avatar-default.svg")'}`,
-                }}
-                onClick={() => {
-                  const fileInput = document.createElement("input");
-                  fileInput.type = "file";
-                  fileInput.accept = "image/*";
-                  fileInput.onchange = (e) => {
-                    const file = (e.target as HTMLInputElement).files?.[0];
-                    if (file) {
-                      setSelectedImage(file);
-                    }
-                  };
-                  fileInput.click();
-                }}
-              />
+                <Box
+                  style={{
+                    cursor: "pointer",
+                    backgroundSize: "100% 100%",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
+                    width: "100%",
+                    height: "100%",
+                    backgroundImage: `${
+                      userData[0]?.profilePicture
+                        ? `url(${userData[0].profilePicture})`
+                        : 'url("avatar-default.svg")'
+                    }`,
+                  }}
+                  onClick={() => {
+                    const fileInput = document.createElement("input");
+                    fileInput.type = "file";
+                    fileInput.accept = "image/*";
+                    fileInput.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        setSelectedImage(file);
+                      }
+                    };
+                    fileInput.click();
+                  }}
+                />
               </Tooltip>
             )}
             <input

@@ -88,7 +88,6 @@ export default function Nav({
     try {
       setIsDeleting(true);
       const result = await deleteEntity(accountAddress, userId, peraWallet);
-      console.log(result);
       if (result?.success) {
         toast({
           title: "Success",
