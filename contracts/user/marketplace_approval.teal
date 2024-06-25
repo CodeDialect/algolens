@@ -1,4 +1,5 @@
 #pragma version 6
+
 txn ApplicationID
 int 0
 ==
@@ -27,7 +28,40 @@ txna ApplicationArgs 0
 byte "check_post"
 ==
 bnz main_l8
+txna ApplicationArgs 0
+byte "update_profile"
+==
+bnz main_l5
 err
+
+main_l5:
+byte "USERNAME"
+app_global_get
+txna ApplicationArgs 1
+==
+byte "OWNER"
+app_global_get
+txn Sender
+==
+&&
+byte "LOGINSTATUS"
+app_global_get
+int 1
+==
+&&
+bnz main_l7
+int 0
+return
+main_l7:
+byte "USERNAME"
+txna ApplicationArgs 2
+app_global_put
+byte "PRICE"
+txna ApplicationArgs 3
+app_global_put
+int 1
+return
+
 main_l8:
 byte "USERNAME"
 app_global_get
@@ -49,6 +83,7 @@ return
 main_l10:
 int 1
 return
+
 main_l11:
 byte "USERNAME"
 app_global_get
@@ -73,6 +108,7 @@ txna ApplicationArgs 2
 app_global_put
 int 1
 return
+
 main_l14:
 byte "USERNAME"
 app_global_get
@@ -97,6 +133,7 @@ int 0
 app_global_put
 int 1
 return
+
 main_l17:
 byte "USERNAME"
 app_global_get
@@ -121,6 +158,7 @@ int 1
 app_global_put
 int 1
 return
+
 main_l20:
 global GroupSize
 int 2
@@ -160,11 +198,13 @@ byte ""
 app_global_put
 int 1
 return
+
 main_l23:
 txn Sender
 global CreatorAddress
 ==
 return
+
 main_l24:
 txn Note
 byte "user-algolens"
@@ -182,6 +222,12 @@ txn Sender
 app_global_put
 byte "PRICE"
 txna ApplicationArgs 1
+app_global_put
+byte "LOGINSTATUS"
+int 0
+app_global_put
+byte "PICTURE"
+byte ""
 app_global_put
 int 1
 return

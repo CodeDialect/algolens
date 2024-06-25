@@ -1,10 +1,11 @@
-from pyteal import *
-
+from pyteal import compileTeal, Mode
 from marketplace_contract import SocialMedia
 
 if __name__ == "__main__":
-    approval_program = SocialMedia().approval_program()
-    clear_program = SocialMedia().clear_program()
+    social_media_contract = SocialMedia()
+    
+    approval_program = social_media_contract.approval_program()
+    clear_program = social_media_contract.clear_program()
 
     # Mode.Application specifies that this is a smart contract
     compiled_approval = compileTeal(approval_program, Mode.Application, version=6)
@@ -13,7 +14,6 @@ if __name__ == "__main__":
         teal.write(compiled_approval)
         teal.close()
 
-    # Mode.Application specifies that this is a smart contract
     compiled_clear = compileTeal(clear_program, Mode.Application, version=6)
     print(compiled_clear)
     with open("marketplace_clear.teal", "w") as teal:

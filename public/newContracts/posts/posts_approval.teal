@@ -1,4 +1,5 @@
 #pragma version 6
+
 txn ApplicationID
 int 0
 ==
@@ -7,12 +8,44 @@ txn OnCompletion
 int DeleteApplication
 ==
 bnz main_l3
+txn OnCompletion
+int NoOp
+==
+bnz main_l2
 err
-main_l3:
+
+main_l2:
+txna ApplicationArgs 0
+byte "update_post"
+==
+bnz update_post
+err
+
+update_post:
 txn Sender
 global CreatorAddress
 ==
+assert
+txn NumAppArgs
+int 2
+==
+assert
+byte "POST"
+txna ApplicationArgs 1
+app_global_put
+byte "TIME"
+global LatestTimestamp
+app_global_put
+int 1
 return
+
+main_l3:
+txn Sender
+app_global_get
+byte "OWNER"
+==
+return
+
 main_l4:
 txn Note
 byte "post-algolens"

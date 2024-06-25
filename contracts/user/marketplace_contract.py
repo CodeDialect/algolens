@@ -14,7 +14,8 @@ class SocialMedia:
         logout = Bytes("logout")
         update_picture = Bytes("update_picture")
         check_post = Bytes("check_post")
-        
+        update_profile = Bytes("update_profile")  # New method for updating profile
+
     def application_creation(self):
         return Seq([
             Assert(Txn.note() == Bytes("user-algolens")),
@@ -22,6 +23,8 @@ class SocialMedia:
             App.globalPut(self.GlobalVariables.username, Txn.application_args[0]),
             App.globalPut(self.GlobalVariables.owner, Txn.sender()),
             App.globalPut(self.GlobalVariables.price, Txn.application_args[1]),
+            App.globalPut(self.GlobalVariables.login_status, Int(0)),
+            App.globalPut(self.GlobalVariables.profile_picture, Bytes("")),
             Approve()
         ])
 
@@ -31,7 +34,7 @@ class SocialMedia:
         valid_payment_to_seller = And(
             Gtxn[1].type_enum() == TxnType.Payment,
             Gtxn[1].amount() == Btoi(App.globalGet(self.GlobalVariables.price)),
-            Gtxn[1].sender() == Gtxn[0].sender()
+            Gtxn[1].receiver() == Gtxn[0].sender()
         )
     
         can_signup = And(valid_number_of_transactions, valid_payment_to_seller)
@@ -51,28 +54,28 @@ class SocialMedia:
         assert_valid_username = App.globalGet(self.GlobalVariables.username) == username
         assert_valid_owner = App.globalGet(self.GlobalVariables.owner) == Txn.sender()
         assert_login_status = App.globalGet(self.GlobalVariables.login_status) == Int(0)
-        validateUser = And(assert_valid_username, assert_valid_owner, assert_login_status)
+        validate_user = And(assert_valid_username, assert_valid_owner, assert_login_status)
         
         update_state = Seq([
             App.globalPut(self.GlobalVariables.login_status, Int(1)),
             Approve()
         ])
     
-        return If(validateUser).Then(update_state).Else(Reject())
+        return If(validate_user).Then(update_state).Else(Reject())
     
     def logout(self):
         username = Txn.application_args[1]
         assert_valid_username = App.globalGet(self.GlobalVariables.username) == username
         assert_valid_owner = App.globalGet(self.GlobalVariables.owner) == Txn.sender()
         assert_login_status = App.globalGet(self.GlobalVariables.login_status) == Int(1)
-        validateUser = And(assert_valid_username, assert_valid_owner, assert_login_status)
+        validate_user = And(assert_valid_username, assert_valid_owner, assert_login_status)
 
         update_state = Seq([
             App.globalPut(self.GlobalVariables.login_status, Int(0)),
             Approve()
         ])
         
-        return If(validateUser).Then(update_state).Else(Reject())    
+        return If(validate_user).Then(update_state).Else(Reject())    
     
     def check_post(self):
         username = Txn.application_args[1]
@@ -80,9 +83,9 @@ class SocialMedia:
         assert_owner = App.globalGet(self.GlobalVariables.owner) == Txn.sender()
         assert_login_status = App.globalGet(self.GlobalVariables.login_status) == Int(1)
         
-        validateUser = And(assert_valid_username, assert_owner, assert_login_status)
+        validate_user = And(assert_valid_username, assert_owner, assert_login_status)
         
-        return If(validateUser).Then(Approve()).Else(Reject())
+        return If(validate_user).Then(Approve()).Else(Reject())
     
     def update_picture(self):
         username = Txn.application_args[1]
@@ -91,15 +94,32 @@ class SocialMedia:
         assert_valid_username = App.globalGet(self.GlobalVariables.username) == username
         assert_valid_owner = App.globalGet(self.GlobalVariables.owner) == Txn.sender()
         assert_login_status = App.globalGet(self.GlobalVariables.login_status) == Int(1)
-        validateUser = And(assert_valid_username, assert_valid_owner, assert_login_status)
+        validate_user = And(assert_valid_username, assert_valid_owner, assert_login_status)
         
         update_state = Seq([
             App.globalPut(self.GlobalVariables.profile_picture, profile_picture),
             Approve()
         ])
         
-        return If(validateUser).Then(update_state).Else(Reject())
+        return If(validate_user).Then(update_state).Else(Reject())
     
+    def update_profile(self):
+        username = Txn.application_args[1]
+        new_username = Txn.application_args[2]
+        new_price = Txn.application_args[3]
+        
+        assert_valid_username = App.globalGet(self.GlobalVariables.username) == username
+        assert_valid_owner = App.globalGet(self.GlobalVariables.owner) == Txn.sender()
+        assert_login_status = App.globalGet(self.GlobalVariables.login_status) == Int(1)
+        validate_user = And(assert_valid_username, assert_valid_owner, assert_login_status)
+        
+        update_state = Seq([
+            App.globalPut(self.GlobalVariables.username, new_username),
+            App.globalPut(self.GlobalVariables.price, new_price),
+            Approve()
+        ])
+        
+        return If(validate_user).Then(update_state).Else(Reject())
 
     def application_deletion(self):
         return Return(Txn.sender() == Global.creator_address())
@@ -112,7 +132,8 @@ class SocialMedia:
             [Txn.application_args[0] == self.AppMethods.login, self.login()],
             [Txn.application_args[0] == self.AppMethods.logout, self.logout()],
             [Txn.application_args[0] == self.AppMethods.update_picture, self.update_picture()],
-            [Txn.application_args[0] == self.AppMethods.check_post, self.check_post()]
+            [Txn.application_args[0] == self.AppMethods.check_post, self.check_post()],
+            [Txn.application_args[0] == self.AppMethods.update_profile, self.update_profile()]  # Added update_profile
         )
 
     def approval_program(self):
