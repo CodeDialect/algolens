@@ -27,7 +27,6 @@ interface LoginProps {
 export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   const [isSignup, setIsSignup] = useState(false);
   const [username, setUsername] = useState("");
-  const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const op = "login";
   const toast = useToast();
@@ -35,33 +34,20 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   const handleSignupClick = () => {
     setIsSignup(!isSignup);
     setUsername("");
-    setIsUsernameAvailable(true);
   };
 
   const handleSignup = async (username: string) => {
-    
-    if (username.trim() === "") {
-      return;
-    }
-
-    if (username.length < 3) {
+    setIsLoading(true);
+    const response = await checkUser(username);
+    if (response !== "Username is available") {
       toast({
         title: "Error",
-        description: "Username must be at least 3 characters",
+        description: response,
         status: "error",
         duration: 9000,
         isClosable: true,
       });
-      return;
-    }
-    if (username.length > 20) {
-      toast({
-        title: "Error",
-        description: "Username must be less than 20 characters",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
+      setIsLoading(false);
       return;
     }
 
@@ -73,6 +59,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
@@ -106,8 +93,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
-    }
-    finally {
+    } finally {
       setIsLoading(false);
       setUsername("");
       handleSignupClick();
@@ -115,6 +101,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
   };
 
   const handleLogin = async (username: string) => {
+    setIsLoading(true);
     if (username.trim() === "") {
       toast({
         title: "Error",
@@ -123,6 +110,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
@@ -134,6 +122,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
@@ -145,10 +134,11 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
-   const response = await checkUser(username);
+    const response = await checkUser(username);
     if (response === "Username is available") {
       toast({
         title: "Error",
@@ -157,6 +147,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
         duration: 9000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
@@ -197,30 +188,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     }
   };
 
-  const handleUsernameKeyUp = async (
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.currentTarget.value.trim() === "") {
-      return;
-    }
-
-    if (e.currentTarget.value.length < 3) {
-      setIsUsernameAvailable(false);
-      return;
-    }
-
-    if (isSignup) {
-      setIsLoading(true);
-      const response = await checkUser(e.currentTarget.value);
-      if (response === "Username is available") {
-        setIsUsernameAvailable(true);
-      } else {
-        setIsUsernameAvailable(false);
-      }
-      setIsLoading(false);
-    }
-  };
-
+  
   return (
     <Flex
       minH="100vh"
@@ -261,21 +229,8 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
             <Input
               value={username.toLowerCase()}
               onChange={(e) => setUsername(e.target.value)}
-              onKeyUp={handleUsernameKeyUp}
               maxLength={20}
             />
-            {isSignup &&
-              username.trim() !== "" &&
-              !isLoading &&
-              (isUsernameAvailable ? (
-                <FormHelperText color="green">
-                  Username is available!
-                </FormHelperText>
-              ) : (
-                <FormHelperText color="red">
-                  Username is not available.
-                </FormHelperText>
-              ))}
           </FormControl>
         </Stack>
         <Button
@@ -290,20 +245,13 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
           }
           onClick={() => {
             if (isSignup) {
-              if (isUsernameAvailable) {
                 handleSignup(username);
-              }
             }
             if (!isSignup) {
               handleLogin(username);
             }
           }}
           width="full"
-          isDisabled={
-            isSignup
-              ? !isUsernameAvailable || isLoading || username.trim() === ""
-              : isLoading
-          }
         >
           {isSignup ? "Buy Username" : "Sign in"}
         </Button>
