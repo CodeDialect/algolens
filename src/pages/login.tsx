@@ -195,7 +195,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     } finally {
       setIsLoading(false);
       setTimeout(() => {
-        // window.location.reload();
+        window.location.reload();
       }, 500);
     }
   };
