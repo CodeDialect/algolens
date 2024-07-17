@@ -33,10 +33,7 @@ export const deleteEntity = async (
       .txType("appl")
       .do();
     const deletePostGroup: any[] = [];
-
-    if (userPosts["transactions"].length === 0) {
-      return null
-    } else {
+    console.log(userPosts);
       await Promise.all(
         userPosts.transactions.map(
           async (transaction: { [x: string]: any }) => {
@@ -145,10 +142,6 @@ export const deleteEntity = async (
                 " confirmed in round " +
                 confirmedDelAppTxn["confirmed-round"]
             );
-            return {
-              success: true,
-              message: "User deleted successfully",
-            };
           })
           .catch(() => {
             return {
@@ -156,8 +149,12 @@ export const deleteEntity = async (
               message: "Failed to delete user",
             };
           });
+          return {
+            success: true,
+            message: "User deleted successfully",
+          };
       }
-    }
+
   } catch (error) {
     return {
       success: false,
