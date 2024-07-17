@@ -138,11 +138,23 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
       return;
     }
 
-    const response = await checkUser(username);
+    const response = await checkUser(username, accountAddress);
     if (response === "Username is available") {
       toast({
         title: "Error",
         description: "Username not found",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (response === "Username is registered with another address") {
+      toast({
+        title: "Error",
+        description: "Username is registered with another address",
         status: "error",
         duration: 9000,
         isClosable: true,
@@ -183,12 +195,11 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
     } finally {
       setIsLoading(false);
       setTimeout(() => {
-        window.location.reload();
+        // window.location.reload();
       }, 500);
     }
   };
 
-  
   return (
     <Flex
       minH="100vh"
@@ -245,7 +256,7 @@ export default function LoginPage({ peraWallet, accountAddress }: LoginProps) {
           }
           onClick={() => {
             if (isSignup) {
-                handleSignup(username);
+              handleSignup(username);
             }
             if (!isSignup) {
               handleLogin(username);

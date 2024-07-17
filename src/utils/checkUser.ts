@@ -1,6 +1,9 @@
 import { fetchData, fetchUserData } from "./fetchData";
 
-export const checkUser = async (username: string): Promise<string> => {
+export const checkUser = async (
+  username: string,
+  accountAddress?: string
+): Promise<string> => {
   if (username.trim() === "") {
     return "Username cannot be empty";
   }
@@ -24,13 +27,29 @@ export const checkUser = async (username: string): Promise<string> => {
   }
   if (transactionArray["transactions"].length > 0) {
     const userNames: string[] = [];
+    let matchUser: boolean = true;
     for (const item of transactionArray["transactions"]) {
       const appId = item["created-application-index"];
       const userData = await fetchUserData(appId);
       if (userData === null) continue;
+
       const userName = userData[0].username ?? "";
       userNames.push(userName.trim());
+
+      const userdata = userData.find((user) => user.owner === accountAddress);
+      if (
+        userdata &&
+        userNames.includes(username.trim()) &&
+        userdata.username !== username
+      ) {
+        matchUser = false;
+      }
     }
+
+    if (!matchUser) {
+      return "Username is registered with another address";
+    }
+
     if (userNames.includes(username.trim())) {
       return "Username is not available";
     }

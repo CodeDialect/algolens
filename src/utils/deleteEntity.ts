@@ -33,7 +33,6 @@ export const deleteEntity = async (
       .txType("appl")
       .do();
     const deletePostGroup: any[] = [];
-    console.log(userPosts);
       await Promise.all(
         userPosts.transactions.map(
           async (transaction: { [x: string]: any }) => {
