@@ -13,7 +13,7 @@ export const algodClient = new algosdk.Algodv2(config.algodToken, config.algodSe
 
 export const indexerClient = new algosdk.Indexer(config.indexerToken, config.indexerServer, config.indexerPort);
 
-export const minRound = 42158684;
+export const minRound = 42600866;
 
 // https://github.com/algorandfoundation/ARCs/blob/main/ARCs/arc-0002.md
 export const userNote = new TextEncoder().encode("user-algolens")
