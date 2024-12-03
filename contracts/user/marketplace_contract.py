@@ -14,14 +14,24 @@ class SocialMedia:
         logout = Bytes("logout")
         update_picture = Bytes("update_picture")
         check_post = Bytes("check_post")
+        set_price = Bytes("set_price")
         
     def application_creation(self):
         return Seq([
             Assert(Txn.note() == Bytes("user-algolens")),
-            Assert(Txn.application_args.length() == Int(2)),
+            Assert(Txn.application_args.length() == Int(1)),
             App.globalPut(self.GlobalVariables.username, Txn.application_args[0]),
             App.globalPut(self.GlobalVariables.owner, Txn.sender()),
-            App.globalPut(self.GlobalVariables.price, Txn.application_args[1]),
+            App.globalPut(self.GlobalVariables.price, Int(0)),
+            App.globalPut(self.GlobalVariables.login_status, Int(0)),
+            App.globalPut(self.GlobalVariables.profile_picture, Bytes("")),
+            Approve()
+        ])
+
+    def set_price(self):
+        return Seq([
+            Assert(Txn.sender() == App.globalGet(self.GlobalVariables.owner)),
+            App.globalPut(self.GlobalVariables.price, Btoi(Txn.application_args[1])),
             Approve()
         ])
 
@@ -30,10 +40,10 @@ class SocialMedia:
         valid_number_of_transactions = Global.group_size() == Int(2)
         valid_payment_to_seller = And(
             Gtxn[1].type_enum() == TxnType.Payment,
-            Gtxn[1].amount() == Btoi(App.globalGet(self.GlobalVariables.price)),
+            Gtxn[1].amount() == App.globalGet(self.GlobalVariables.price),
             Gtxn[1].sender() == Gtxn[0].sender()
         )
-    
+
         can_signup = And(valid_number_of_transactions, valid_payment_to_seller)
         update_state = Seq([
             App.globalPut(self.GlobalVariables.username, username),
@@ -88,12 +98,20 @@ class SocialMedia:
         username = Txn.application_args[1]
         profile_picture = Txn.application_args[2]
         
+        # Validation checks
         assert_valid_username = App.globalGet(self.GlobalVariables.username) == username
         assert_valid_owner = App.globalGet(self.GlobalVariables.owner) == Txn.sender()
         assert_login_status = App.globalGet(self.GlobalVariables.login_status) == Int(1)
         validateUser = And(assert_valid_username, assert_valid_owner, assert_login_status)
         
+        # Length and format checks
+        assert_valid_picture = And(
+            Len(profile_picture) <= Int(512),
+            Len(profile_picture) > Int(0)
+        )
+        
         update_state = Seq([
+            Assert(assert_valid_picture),
             App.globalPut(self.GlobalVariables.profile_picture, profile_picture),
             Approve()
         ])
@@ -108,6 +126,7 @@ class SocialMedia:
         return Cond(
             [Txn.application_id() == Int(0), self.application_creation()],
             [Txn.on_completion() == OnComplete.DeleteApplication, self.application_deletion()],
+            [Txn.application_args[0] == self.AppMethods.set_price, self.set_price()],
             [Txn.application_args[0] == self.AppMethods.signup, self.signup()],
             [Txn.application_args[0] == self.AppMethods.login, self.login()],
             [Txn.application_args[0] == self.AppMethods.logout, self.logout()],
